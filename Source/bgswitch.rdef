@@ -1,0 +1,16 @@
+resource app_signature "application/x-vnd.cpr.bgswitch";
+
+resource app_flags B_SINGLE_LAUNCH | B_BACKGROUND_APP;
+
+resource app_version {
+	major  = 0,
+	middle = 0,
+	minor  = 0,
+
+	variety = B_APPV_DEVELOPMENT,
+	internal = 0,
+
+	short_info = "bgswitch Short Info",
+	long_info = "bgswitch Long Info"
+};
+

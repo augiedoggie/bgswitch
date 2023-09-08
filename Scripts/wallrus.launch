@@ -1,0 +1,10 @@
+# This launch script should be edited and then copied to one if the launch roster directories, like:
+# /boot/system/non-packaged/data/user_launch/wallrus.launch
+
+job x-vnd.cpr.wallrus {
+	launch /bin/ruby /storage/projects/bgswitch/Scripts/wallrus.rb -s
+	require x-vnd.be-trak
+	on initial_volumes_mounted
+	no_safemode
+	legacy
+}
