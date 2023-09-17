@@ -14,7 +14,7 @@ $image_dirs = {
      '/storage/owncloud/Images/a_vintage_journey',
      '/storage/owncloud/Images/ben-regimbal',
      '/storage/owncloud/Images/chahin-lowpoly',
-     '/storage/owncloud/Images/escher',
+     '/storage/owncloud/Images/mc_escher',
      '/storage/owncloud/Images/jia-yonghui',
      '/storage/owncloud/Images/townscaper'],
   3 =>

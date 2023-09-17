@@ -3,12 +3,11 @@
 
 #include <Application.h>
 #include <InterfaceDefs.h>
-
 #include <iostream>
 
 
 void
-_print_subhelp(argparse::ArgumentParser &program)
+_print_subhelp(argparse::ArgumentParser& program)
 {
 	if (program.is_subcommand_used("list"))
 		std::cerr << program.at<argparse::ArgumentParser>("list") << std::endl;
@@ -72,11 +71,11 @@ main(int argc, char** argv)
 
 	try {
 		program.parse_args(argc, argv);
-	} catch (const std::runtime_error &err) {
+	} catch (const std::runtime_error& err) {
 		std::cerr << err.what() << std::endl;
 		_print_subhelp(program);
 		return 1;
-	} catch(const std::invalid_argument &err) {
+	} catch (const std::invalid_argument& err) {
 		std::cerr << "invalid argument: " << err.what() << std::endl;
 		_print_subhelp(program);
 		return 1;

@@ -5,13 +5,10 @@
 #include <Node.h>
 #include <Path.h>
 #include <String.h>
-
 #include <be_apps/Tracker/Background.h>
-#include <kernel/fs_attr.h>
-
-#include <private/shared/AutoDeleter.h>
-
 #include <iostream>
+#include <kernel/fs_attr.h>
+#include <private/shared/AutoDeleter.h>
 
 
 BackgroundManager::BackgroundManager(const char* path)
