@@ -86,7 +86,7 @@ BackgroundManager::_FindWorkspaceIndex(int32 workspace)
 		if ((1 << (workspace - 1)) & workspaces)
 			return x;
 	}
-	std::cerr << "Error: Workspace not found in BMessage" << std::endl;
+	// return an error if we didn't find it because we have a global background or a single workspace or ...
 	return B_ERROR;
 }
 
@@ -95,9 +95,10 @@ status_t
 BackgroundManager::GetBackground(int32 workspace, BString& path, int32* mode, BPoint* offset, bool* erase)
 {
 	int32 messageIndex = _FindWorkspaceIndex(workspace);
-	if (messageIndex < 0)
-		//No background set!
-		return B_OK;
+	if (messageIndex < 0) {
+		std::cerr << "Warning: No background for this specific workspace.  Showing global workspace values." << std::endl;
+		messageIndex = 0;
+	}
 
 	if (fBackgroundMessage->FindString(B_BACKGROUND_IMAGE, messageIndex, &path) != B_OK) {
 		// message index has been deleted?
@@ -133,17 +134,16 @@ BackgroundManager::DumpBackground(int32 workspace, bool verbose)
 		return B_ERROR;
 
 	if (path.IsEmpty()) {
-		std::cout << "File: No background set!" << std::endl;
-		if (!verbose)
+		if (verbose)
+			std::cout << "File: No background set!" << std::endl;
+		else
 			return B_OK;
-	}
-
-	if (!verbose) {
+	} else if (!verbose) {
 		std::cout << path << std::endl;
 		return B_OK;
+	} else {
+		std::cout << "File: " << path << std::endl;
 	}
-
-	std::cout << "File: " << path << std::endl;
 
 	switch(mode) {
 		case B_BACKGROUND_MODE_USE_ORIGIN:
