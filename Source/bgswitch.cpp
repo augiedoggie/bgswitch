@@ -131,11 +131,10 @@ main(int argc, char** argv)
 			return 1;
 		}
 		status_t result = B_OK;
-		for (int32 x = workspace; x <= maxWorkspace && result == B_OK; x++)
-			result = manager.ClearBackground(x, false, verbose);
+		for (int32 x = workspace; x <= maxWorkspace; x++)
+			 manager.ClearBackground(x, false, verbose);
 
-		if (result == B_OK)
-			manager.SendTrackerMessage();
+		manager.SendTrackerMessage();
 
 		return 0;
 	} else if (program["debug"] != true)
