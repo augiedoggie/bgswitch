@@ -10,6 +10,8 @@
 #include <kernel/fs_attr.h>
 #include <private/shared/AutoDeleter.h>
 
+#define BACKGROUND_SET  "be:bgndimginfoset"
+
 
 BackgroundManager::BackgroundManager(const char* path)
 	:
@@ -72,7 +74,7 @@ BackgroundManager::InitCheck()
 
 
 status_t
-BackgroundManager::_DisableWorkspaceIndex(int32 workspace)
+BackgroundManager::_RemoveWorkspaceIndex(int32 workspace)
 {
 	int32 setWorkspaces = 0;
 	if (fBackgroundMessage->FindInt32(B_BACKGROUND_WORKSPACES, 0, &setWorkspaces) != B_OK) {
@@ -237,27 +239,37 @@ BackgroundManager::DumpBackground(int32 workspace, bool verbose)
 status_t
 BackgroundManager::ClearBackground(int32 workspace, bool complete, bool verbose)
 {
+	if (verbose)
+		std::cout << (complete ? "Removing " : "Clearing ") << workspace << std::endl;
+
 	int32 messageIndex = _FindWorkspaceIndex(workspace);
-	if (messageIndex < 0) {
-		std::cerr << "Error: workspace doesn't have a custom background set" << std::endl;
+	if (messageIndex < 0)
 		return B_ERROR;
-	}
 
 	if (!complete)
 		return SetBackground(NULL, workspace, verbose);
 
-	//TODO handle complete removal
-	//if (_DisableWorkspaceIndex(workspace) != B_OK)
-	//	return B_ERROR;
+	// handle complete removal
+	if (_RemoveWorkspaceIndex(workspace) != B_OK)
+		return B_ERROR;
 
-	//return _WriteMessage();
-	return B_ERROR;
+	fBackgroundMessage->RemoveData(B_BACKGROUND_WORKSPACES, messageIndex);
+	fBackgroundMessage->RemoveData(B_BACKGROUND_IMAGE, messageIndex);
+	fBackgroundMessage->RemoveData(B_BACKGROUND_MODE, messageIndex);
+	fBackgroundMessage->RemoveData(B_BACKGROUND_ORIGIN, messageIndex);
+	fBackgroundMessage->RemoveData(B_BACKGROUND_ERASE_TEXT, messageIndex);
+	fBackgroundMessage->RemoveData(BACKGROUND_SET, messageIndex);
+
+	return _WriteMessage();
 }
 
 
 status_t
 BackgroundManager::SetBackground(const char* imagePath, int32 workspace, bool verbose)
 {
+	if (verbose)
+		std::cout << "Workspace " << workspace << ": " << (imagePath == NULL ? "No background set" : imagePath) << std::endl;
+
 	int32 messageIndex = _FindWorkspaceIndex(workspace);
 	if (messageIndex < 0) {
 		// we're switching from global to a locally set background, find the next free index
@@ -271,6 +283,7 @@ BackgroundManager::SetBackground(const char* imagePath, int32 workspace, bool ve
 		fBackgroundMessage->AddInt32(B_BACKGROUND_MODE, B_BACKGROUND_MODE_SCALED);
 		fBackgroundMessage->AddPoint(B_BACKGROUND_ORIGIN, BPoint(0,0));
 		fBackgroundMessage->AddBool(B_BACKGROUND_ERASE_TEXT, true);
+		fBackgroundMessage->AddInt32(BACKGROUND_SET, 0);
 	}
 
 	// verify the file exists if we were given a non-empty path
@@ -289,9 +302,6 @@ BackgroundManager::SetBackground(const char* imagePath, int32 workspace, bool ve
 
 	if (_WriteMessage() != B_OK)
 		return B_ERROR;
-
-	if (verbose)
-		std::cout << "Workspace " << workspace << ": " << (imagePath == NULL ? "No background set" : imagePath) << std::endl;
 
 	return B_OK;
 }

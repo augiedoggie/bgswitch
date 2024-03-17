@@ -115,15 +115,13 @@ main(int argc, char** argv)
 		return 0;
 	} else if (program.is_subcommand_used("set")) {
 		std::string imagePath = set_command.get<std::string>("file");
-		status_t result = B_OK;
-		for (int32 x = workspace; x <= maxWorkspace && result == B_OK; x++) {
-			if (verbose)
-				std::cout << "setting: " << x << " -> " << imagePath << std::endl;
-
-			result = manager.SetBackground(imagePath.c_str(), x, verbose);
+		if (program["all"] == true) {
+			// if -a is used then we need to set workspace 0 and completely clear the rest
+			workspace = 0;
+			for (int32 x = count_workspaces(); x > 0; x--)
+				manager.ClearBackground(x, true, verbose);
 		}
-
-		if (result == B_OK)
+		if (manager.SetBackground(imagePath.c_str(), workspace, verbose) == B_OK)
 			manager.SendTrackerMessage();
 
 		return 0;
@@ -133,12 +131,8 @@ main(int argc, char** argv)
 			return 1;
 		}
 		status_t result = B_OK;
-		for (int32 x = workspace; x <= maxWorkspace && result == B_OK; x++) {
-			if (verbose)
-				std::cout << "clearing: " << x << std::endl;
-
+		for (int32 x = workspace; x <= maxWorkspace && result == B_OK; x++)
 			result = manager.ClearBackground(x, false, verbose);
-		}
 
 		if (result == B_OK)
 			manager.SendTrackerMessage();

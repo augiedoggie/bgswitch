@@ -30,7 +30,7 @@ public:
 private:
 	int32		_CreateWorkspaceIndex(int32 workspace);
 
-	int32		_DisableWorkspaceIndex(int32 workspace);
+	int32		_RemoveWorkspaceIndex(int32 workspace);
 
 	int32		_FindWorkspaceIndex(int32 workspace);
 
