@@ -56,18 +56,21 @@ main(int argc, char** argv)
 	list_command.add_description("List background information");
 
 	argparse::ArgumentParser set_command("set", "1.0", argparse::default_arguments::help);
-	set_command.add_description("Set workspace background");
+	set_command.add_description("Set background");
 	set_command.add_argument("file")
 		.help("Path to the image file")
 		.required();
 
 	argparse::ArgumentParser clear_command("clear", "1.0", argparse::default_arguments::help);
-	clear_command.add_description("Clear workspace background");
+	clear_command.add_description("Make background empty (same effect as: set \"\")");
 
+	argparse::ArgumentParser reset_command("reset", "1.0", argparse::default_arguments::help);
+	reset_command.add_description("Reset background to global default");
 
 	program.add_subparser(list_command);
 	program.add_subparser(set_command);
 	program.add_subparser(clear_command);
+	program.add_subparser(reset_command);
 
 	try {
 		program.parse_args(argc, argv);
@@ -125,14 +128,14 @@ main(int argc, char** argv)
 			manager.SendTrackerMessage();
 
 		return 0;
-	} else if (program.is_subcommand_used("clear")) {
+	} else if (program.is_subcommand_used("clear") || program.is_subcommand_used("reset")) {
 		if (workspace == 0) {
-			std::cerr << "Error: unable to clear global workspace" << std::endl;
+			std::cerr << "Error: unable to clear/reset the global workspace" << std::endl;
 			return 1;
 		}
 		status_t result = B_OK;
 		for (int32 x = workspace; x <= maxWorkspace; x++)
-			 manager.ClearBackground(x, false, verbose);
+			 manager.ClearBackground(x, program.is_subcommand_used("reset"), verbose);
 
 		manager.SendTrackerMessage();
 
