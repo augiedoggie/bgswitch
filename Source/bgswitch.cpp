@@ -22,7 +22,7 @@ _print_subhelp(argparse::ArgumentParser& program)
 int
 _check_workspace(int workspace)
 {
-	if (workspace < 1 || workspace > count_workspaces()) {
+	if (workspace < 0 || workspace > count_workspaces()) {
 		std::cerr << "invalid workspace # specified" << std::endl;
 		exit(1);
 	}
@@ -128,6 +128,10 @@ main(int argc, char** argv)
 
 		return 0;
 	} else if (program.is_subcommand_used("clear")) {
+		if (workspace == 0) {
+			std::cerr << "Error: unable to clear global workspace" << std::endl;
+			return 1;
+		}
 		status_t result = B_OK;
 		for (int32 x = workspace; x <= maxWorkspace && result == B_OK; x++) {
 			if (verbose)

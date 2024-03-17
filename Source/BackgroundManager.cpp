@@ -93,6 +93,10 @@ BackgroundManager::_DisableWorkspaceIndex(int32 workspace)
 int32
 BackgroundManager::_FindWorkspaceIndex(int32 workspace)
 {
+	// we're adjusting the global/default background
+	if (workspace == 0)
+		return 0;
+
 	int32 countFound = 0;
 	fBackgroundMessage->GetInfo(B_BACKGROUND_WORKSPACES, NULL, &countFound);
 	for (int32 x = 1; x < countFound; x++) {
