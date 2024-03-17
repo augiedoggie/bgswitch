@@ -71,6 +71,25 @@ BackgroundManager::InitCheck()
 }
 
 
+status_t
+BackgroundManager::_DisableWorkspaceIndex(int32 workspace)
+{
+	int32 setWorkspaces = 0;
+	if (fBackgroundMessage->FindInt32(B_BACKGROUND_WORKSPACES, 0, &setWorkspaces) != B_OK) {
+		std::cerr << "Error: Unable to find B_BACKGROUND_WORKSPACES BMessage" << std::endl;
+		return B_ERROR;
+	}
+
+	// tell Tracker that this workspace uses the global background
+	setWorkspaces |= (1 << (workspace - 1));
+	if (fBackgroundMessage->ReplaceInt32(B_BACKGROUND_WORKSPACES, 0, setWorkspaces) != B_OK) {
+		std::cerr << "Error: Unable to replace B_BACKGROUND_WORKSPACES BMessage" << std::endl;
+		return B_ERROR;
+	}
+	return B_OK;
+}
+
+
 int32
 BackgroundManager::_FindWorkspaceIndex(int32 workspace)
 {
@@ -104,12 +123,31 @@ BackgroundManager::_CreateWorkspaceIndex(int32 workspace)
 	}
 
 	// tell Tracker that this workspace has a custom background
-	setWorkspaces = setWorkspaces & ~(1 << (workspace - 1));
+	setWorkspaces &=  ~(1 << (workspace - 1));
 	if (fBackgroundMessage->ReplaceInt32(B_BACKGROUND_WORKSPACES, 0, setWorkspaces) != B_OK) {
 		std::cerr << "Error: Unable to replace B_BACKGROUND_WORKSPACES BMessage" << std::endl;
 		return B_ERROR;
 	}
 	return countFound;
+}
+
+
+status_t
+BackgroundManager::_WriteMessage()
+{
+	char* flat = new char[fBackgroundMessage->FlattenedSize()];
+	ArrayDeleter<char> _(flat);
+
+	if (fBackgroundMessage->Flatten(flat, fBackgroundMessage->FlattenedSize()) != B_OK) {
+		std::cerr << "Error: unable to flatten new background message" << std::endl;
+		return B_ERROR;
+	}
+
+	if (fFolderNode->WriteAttr(B_BACKGROUND_INFO, B_MESSAGE_TYPE, 0, flat, fBackgroundMessage->FlattenedSize()) < B_OK) {
+		std::cerr << "Error: unable to write message to node" << std::endl;
+		return B_ERROR;
+	}
+	return B_OK;
 }
 
 
@@ -193,6 +231,27 @@ BackgroundManager::DumpBackground(int32 workspace, bool verbose)
 
 
 status_t
+BackgroundManager::ClearBackground(int32 workspace, bool complete, bool verbose)
+{
+	int32 messageIndex = _FindWorkspaceIndex(workspace);
+	if (messageIndex < 0) {
+		std::cerr << "Error: workspace doesn't have a custom background set" << std::endl;
+		return B_ERROR;
+	}
+
+	if (!complete)
+		return SetBackground(NULL, workspace, verbose);
+
+	//TODO handle complete removal
+	//if (_DisableWorkspaceIndex(workspace) != B_OK)
+	//	return B_ERROR;
+
+	//return _WriteMessage();
+	return B_ERROR;
+}
+
+
+status_t
 BackgroundManager::SetBackground(const char* imagePath, int32 workspace, bool verbose)
 {
 	int32 messageIndex = _FindWorkspaceIndex(workspace);
@@ -224,18 +283,8 @@ BackgroundManager::SetBackground(const char* imagePath, int32 workspace, bool ve
 		return B_ERROR;
 	}
 
-	char* flat = new char[fBackgroundMessage->FlattenedSize()];
-	ArrayDeleter<char> _(flat);
-
-	if (fBackgroundMessage->Flatten(flat, fBackgroundMessage->FlattenedSize()) != B_OK) {
-		std::cerr << "Error: unable to flatten new background message" << std::endl;
+	if (_WriteMessage() != B_OK)
 		return B_ERROR;
-	}
-
-	if (fFolderNode->WriteAttr(B_BACKGROUND_INFO, B_MESSAGE_TYPE, 0, flat, fBackgroundMessage->FlattenedSize()) < B_OK) {
-		std::cerr << "Error: unable to write message to node" << std::endl;
-		return B_ERROR;
-	}
 
 	if (verbose)
 		std::cout << "Workspace " << workspace << ": " << (imagePath == NULL ? "No background set" : imagePath) << std::endl;

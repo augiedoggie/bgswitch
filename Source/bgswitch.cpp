@@ -133,7 +133,7 @@ main(int argc, char** argv)
 			if (verbose)
 				std::cout << "clearing: " << workspace << std::endl;
 
-			result = manager.SetBackground(NULL, workspace, verbose);
+			result = manager.ClearBackground(workspace, false, verbose);
 		}
 
 		if (result == B_OK)
