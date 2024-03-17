@@ -140,7 +140,8 @@ main(int argc, char** argv)
 			manager.SendTrackerMessage();
 
 		return 0;
-	} else
+	} else if (program["debug"] != true)
+		// only print the help if we don't have a command and aren't asked to dump the message
 		std::cout << program << std::endl;
 
 	return 1;
