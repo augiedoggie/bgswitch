@@ -118,9 +118,9 @@ main(int argc, char** argv)
 		status_t result = B_OK;
 		for (int32 x = workspace; x <= maxWorkspace && result == B_OK; x++) {
 			if (verbose)
-				std::cout << "setting: " << workspace << " -> " << imagePath << std::endl;
+				std::cout << "setting: " << x << " -> " << imagePath << std::endl;
 
-			result = manager.SetBackground(imagePath.c_str(), workspace, verbose);
+			result = manager.SetBackground(imagePath.c_str(), x, verbose);
 		}
 
 		if (result == B_OK)
@@ -131,9 +131,9 @@ main(int argc, char** argv)
 		status_t result = B_OK;
 		for (int32 x = workspace; x <= maxWorkspace && result == B_OK; x++) {
 			if (verbose)
-				std::cout << "clearing: " << workspace << std::endl;
+				std::cout << "clearing: " << x << std::endl;
 
-			result = manager.ClearBackground(workspace, false, verbose);
+			result = manager.ClearBackground(x, false, verbose);
 		}
 
 		if (result == B_OK)
