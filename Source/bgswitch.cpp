@@ -109,10 +109,7 @@ main(int argc, char** argv)
 
 	if (program.is_subcommand_used("list")) {
 		for (int32 x = workspace; x <= maxWorkspace; x++) {
-			if (!verbose) std::cout << x << ":";
-
 			manager.DumpBackground(x, verbose);
-
 			if (verbose) std::cout << std::endl;
 		}
 		return 0;

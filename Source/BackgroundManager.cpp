@@ -122,9 +122,6 @@ BackgroundManager::GetBackground(int32 workspace, BString& path, int32* mode, BP
 status_t
 BackgroundManager::DumpBackground(int32 workspace, bool verbose)
 {
-	if (verbose)
-		std::cout << "Workspace: " << workspace << std::endl;
-
 	BString path;
 	int32 mode = B_BACKGROUND_MODE_SCALED;
 	BPoint offset;
@@ -132,6 +129,11 @@ BackgroundManager::DumpBackground(int32 workspace, bool verbose)
 
 	if (GetBackground(workspace, path, &mode, &offset, &erase) != B_OK)
 		return B_ERROR;
+
+	if (verbose)
+		std::cout << "Workspace: " << workspace << std::endl;
+	else
+		std::cout << workspace << ":";
 
 	if (path.IsEmpty()) {
 		if (verbose)
