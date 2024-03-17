@@ -91,6 +91,28 @@ BackgroundManager::_FindWorkspaceIndex(int32 workspace)
 }
 
 
+int32
+BackgroundManager::_CreateWorkspaceIndex(int32 workspace)
+{
+	int32 countFound = 0;
+	fBackgroundMessage->GetInfo(B_BACKGROUND_WORKSPACES, NULL, &countFound);
+
+	int32 setWorkspaces = 0;
+	if (fBackgroundMessage->FindInt32(B_BACKGROUND_WORKSPACES, 0, &setWorkspaces) != B_OK) {
+		std::cerr << "Error: Unable to find B_BACKGROUND_WORKSPACES BMessage" << std::endl;
+		return B_ERROR;
+	}
+
+	// tell Tracker that this workspace has a custom background
+	setWorkspaces = setWorkspaces & ~(1 << (workspace - 1));
+	if (fBackgroundMessage->ReplaceInt32(B_BACKGROUND_WORKSPACES, 0, setWorkspaces) != B_OK) {
+		std::cerr << "Error: Unable to replace B_BACKGROUND_WORKSPACES BMessage" << std::endl;
+		return B_ERROR;
+	}
+	return countFound;
+}
+
+
 status_t
 BackgroundManager::GetBackground(int32 workspace, BString& path, int32* mode, BPoint* offset, bool* erase)
 {
@@ -175,28 +197,33 @@ BackgroundManager::SetBackground(const char* imagePath, int32 workspace, bool ve
 {
 	int32 messageIndex = _FindWorkspaceIndex(workspace);
 	if (messageIndex < 0) {
-		//TODO handle setting a background for a workspace that had none
+		// we're switching from global to a locally set background, find the next free index
+		messageIndex = _CreateWorkspaceIndex(workspace);
 		if (verbose)
-			std::cerr << "Workspace " << workspace << ": No background set, unable to set new one!" << std::endl;
-		return B_OK;
+			std::cerr << "Workspace " << workspace << ": Creating new workspace index!" << std::endl;
+
+		//TODO we should get these default values from index 0
+		fBackgroundMessage->AddInt32(B_BACKGROUND_WORKSPACES, (1 << (workspace - 1)));
+		fBackgroundMessage->AddString(B_BACKGROUND_IMAGE, "");
+		fBackgroundMessage->AddInt32(B_BACKGROUND_MODE, B_BACKGROUND_MODE_SCALED);
+		fBackgroundMessage->AddPoint(B_BACKGROUND_ORIGIN, BPoint(0,0));
+		fBackgroundMessage->AddBool(B_BACKGROUND_ERASE_TEXT, true);
 	}
 
-	// verify the file exists
-	if (imagePath != NULL) {
+	// verify the file exists if we were given a non-empty path
+	if (imagePath != NULL && strcmp(imagePath, "") != 0) {
 		BEntry newWallEntry(imagePath);
 		if (newWallEntry.InitCheck() != B_OK || !newWallEntry.Exists()) {
 			std::cerr << "Error: unable to find source wallpaper" << std::endl;
 			return B_ERROR;
 		}
-
-		BString oldWall;
-		if (fBackgroundMessage->FindString(B_BACKGROUND_IMAGE, messageIndex, &oldWall) != B_OK) {
-			std::cerr << "Error: no image path in message" << std::endl;
-			return B_ERROR;
-		}
 	}
 
-	fBackgroundMessage->ReplaceString(B_BACKGROUND_IMAGE, messageIndex, imagePath);
+	if (fBackgroundMessage->ReplaceString(B_BACKGROUND_IMAGE, messageIndex, imagePath == NULL ? "" : imagePath) != B_OK) {
+		std::cerr << "Error: unable to replace background image path" << std::endl;
+		return B_ERROR;
+	}
+
 	char* flat = new char[fBackgroundMessage->FlattenedSize()];
 	ArrayDeleter<char> _(flat);
 
