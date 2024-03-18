@@ -77,12 +77,8 @@ main(int argc, char** argv)
 
 	try {
 		program.parse_args(argc, argv);
-	} catch (const std::runtime_error& err) {
-		std::cerr << err.what() << std::endl;
-		_print_subhelp(program);
-		return 1;
-	} catch (const std::invalid_argument& err) {
-		std::cerr << "invalid argument: " << err.what() << std::endl;
+	} catch (const std::exception& err) {
+		std::cerr << "Error: " << err.what() << std::endl;
 		_print_subhelp(program);
 		return 1;
 	}

@@ -30,7 +30,7 @@ BackgroundManager::BackgroundManager(const char* path)
 
 	fFolderNode = new BNode(folderPath.Path());
 	if (fFolderNode->InitCheck() != B_OK) {
-		//TODO better message for file not found
+		// TODO better message for file not found
 		std::cerr << "Error: unable to create BNode for folder" << std::endl;
 		return;
 	}
@@ -273,7 +273,7 @@ BackgroundManager::SetBackground(const char* imagePath, int32 workspace, bool ve
 		if (messageIndex == B_ERROR)
 			return B_ERROR;
 
-		//TODO we should get these default values from index 0
+		// TODO we should get these default values from index 0
 		fBackgroundMessage->AddInt32(B_BACKGROUND_WORKSPACES, (1 << (workspace - 1)));
 		fBackgroundMessage->AddString(B_BACKGROUND_IMAGE, "");
 		fBackgroundMessage->AddInt32(B_BACKGROUND_MODE, B_BACKGROUND_MODE_SCALED);
