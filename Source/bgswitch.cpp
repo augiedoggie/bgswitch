@@ -36,11 +36,11 @@ main(int argc, char** argv)
 	argparse::ArgumentParser program(argv[0], "1.0", argparse::default_arguments::help);
 	program.add_description("Get/Set workspace backgrounds.");
 	program.add_argument("-a", "--all")
-		.help("Get/Set/Clear all workspaces at once")
+		.help("Modify all workspaces at once")
 		.default_value(false)
 		.implicit_value(true);
 	program.add_argument("-w", "--workspace")
-		.help("The workspace # to get/set/clear, otherwise use the current workspace")
+		.help("The workspace # to modify, otherwise use the current workspace")
 		.scan<'i', int>()
 		.default_value(-1);
 	program.add_argument("-v", "--verbose")
