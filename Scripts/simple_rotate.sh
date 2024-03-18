@@ -16,8 +16,8 @@ while true;do
 	echo "Rotating..."
 	for file in ${wallpapers[@]};do
 		echo "Setting wallpaper to $file"
-		echo bgswitch --all set "$file"
-		echo sleep $sleepTime
+		bgswitch --all set "$file"
+		sleep $sleepTime
 	done
 	exit
 done
