@@ -15,15 +15,18 @@ _print_subhelp(argparse::ArgumentParser& program)
 		std::cerr << program.at<argparse::ArgumentParser>("set") << std::endl;
 	else if (program.is_subcommand_used("clear"))
 		std::cerr << program.at<argparse::ArgumentParser>("clear") << std::endl;
+	else if (program.is_subcommand_used("reset"))
+		std::cerr << program.at<argparse::ArgumentParser>("reset") << std::endl;
 	else
 		std::cerr << program;
 }
+
 
 int
 _check_workspace(int workspace)
 {
 	if (workspace < 0 || workspace > count_workspaces()) {
-		std::cerr << "invalid workspace # specified" << std::endl;
+		std::cerr << "Error: invalid workspace # specified" << std::endl;
 		exit(1);
 	}
 	return workspace;
@@ -84,7 +87,7 @@ main(int argc, char** argv)
 		return 1;
 	}
 
-	BackgroundManager manager(NULL);
+	BackgroundManager manager(nullptr);
 
 	if (manager.InitCheck() != B_OK)
 		return 1;
@@ -113,7 +116,8 @@ main(int argc, char** argv)
 	if (program.is_subcommand_used("list")) {
 		for (int32 x = workspace; x <= maxWorkspace; x++) {
 			manager.DumpBackground(x, verbose);
-			if (verbose) std::cout << std::endl;
+			if (verbose)
+				std::cout << std::endl;
 		}
 		return 0;
 	} else if (program.is_subcommand_used("set")) {
@@ -138,7 +142,7 @@ main(int argc, char** argv)
 			if (program.is_subcommand_used("reset"))
 				manager.ResetBackground(x, verbose);
 			else
-				manager.SetBackground(NULL, x, verbose);
+				manager.SetBackground(nullptr, x, verbose);
 		}
 
 		manager.SendTrackerMessage();

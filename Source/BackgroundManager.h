@@ -17,7 +17,7 @@ public:
 
 	status_t	ResetBackground(int32 workspace, bool verbose = false);
 
-	status_t	GetBackground(int32 workspace, BString& path, int32* mode = NULL, BPoint* offset = NULL, bool* erase = NULL);
+	status_t	GetBackground(int32 workspace, BString& path, int32* mode = nullptr, BPoint* offset = nullptr, bool* erase = nullptr);
 
 	status_t	SetBackground(const char* imagePath, int32 workspace, bool verbose = false);
 
