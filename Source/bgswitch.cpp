@@ -122,7 +122,7 @@ main(int argc, char** argv)
 			// if -a is used then we need to set workspace 0 and completely clear the rest
 			workspace = 0;
 			for (int32 x = count_workspaces(); x > 0; x--)
-				manager.ClearBackground(x, true, verbose);
+				manager.ResetBackground(x, verbose);
 		}
 		if (manager.SetBackground(imagePath.c_str(), workspace, verbose) == B_OK)
 			manager.SendTrackerMessage();
@@ -134,8 +134,12 @@ main(int argc, char** argv)
 			return 1;
 		}
 		status_t result = B_OK;
-		for (int32 x = workspace; x <= maxWorkspace; x++)
-			 manager.ClearBackground(x, program.is_subcommand_used("reset"), verbose);
+		for (int32 x = workspace; x <= maxWorkspace; x++) {
+			if (program.is_subcommand_used("reset"))
+				manager.ResetBackground(x, verbose);
+			else
+				manager.SetBackground(NULL, x, verbose);
+		}
 
 		manager.SendTrackerMessage();
 

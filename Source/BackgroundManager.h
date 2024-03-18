@@ -15,7 +15,7 @@ public:
 
 	status_t	InitCheck();
 
-	status_t	ClearBackground(int32 workspace, bool complete = false, bool verbose = false);
+	status_t	ResetBackground(int32 workspace, bool verbose = false);
 
 	status_t	GetBackground(int32 workspace, BString& path, int32* mode = NULL, BPoint* offset = NULL, bool* erase = NULL);
 
