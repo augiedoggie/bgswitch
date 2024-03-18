@@ -61,7 +61,7 @@ main(int argc, char** argv)
 
 	argparse::ArgumentParser setParser("set", "1.0", argparse::default_arguments::help);
 	setParser.add_description("Set workspace background options");
-	setParser.add_epilog("Specify one or more of the file/mode/text/offset options");
+	setParser.add_epilog("Specify one or more of the file/mode/text/offset/color options");
 	setParser.add_argument("-f", "--file")
 		.help("Path to the image file (ex. -f /path/to/file.jpg)")
 		.default_value(std::string{});
@@ -80,6 +80,10 @@ main(int argc, char** argv)
 		.help("X/Y offset in manual placement mode, separated by a space (ex. -o 200 400)")
 		.scan<'i', int32>()
 		.nargs(2);
+	setParser.add_argument("-c", "--color")
+		.help("Set background RGB color, separated by a space (ex. -c 20 100 255)")
+		.scan<'u', uint8>()
+		.nargs(3);
 
 	argparse::ArgumentParser clearParser("clear", "1.0", argparse::default_arguments::help);
 	clearParser.add_description("Make background empty (same effect as: set -f \"\")");
@@ -151,8 +155,8 @@ main(int argc, char** argv)
 		// more option sanity checking
 		if (!setParser.is_used("file") && !setParser.is_used("mode")
 			&& !setParser.is_used("text") && !setParser.is_used("notext")
-			&& !setParser.is_used("offset")) {
-			std::cerr << "Error: must specify one of the file/mode/text/notext/offset options" << std::endl;
+			&& !setParser.is_used("offset") && !setParser.is_used("color")) {
+			std::cerr << "Error: must specify one of the file/mode/text/notext/offset/color options" << std::endl;
 			std::cerr << setParser << std::endl;
 			return 1;
 		}
@@ -222,6 +226,14 @@ main(int argc, char** argv)
 				}
 
 				if (bgManager.SetPlacement(mode, x) != B_OK)
+					return 1;
+			}
+
+			if (setParser.is_used("color")) {
+				auto colorVec = setParser.get<std::vector<uint8>>("color");
+				if (verbose)
+					std::cout << "Setting RGB color to {r:" << +colorVec[0] << ",g:" << +colorVec[1] << ",b:" << +colorVec[2] << "} for workspace " << x << std::endl;
+				if (bgManager.SetColor((rgb_color){colorVec[0], colorVec[1], colorVec[2]}, x) != B_OK)
 					return 1;
 			}
 		}

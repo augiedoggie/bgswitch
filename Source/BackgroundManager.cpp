@@ -4,6 +4,7 @@
 #include <Messenger.h>
 #include <Node.h>
 #include <Path.h>
+#include <Screen.h>
 #include <String.h>
 #include <be_apps/Tracker/Background.h>
 #include <iostream>
@@ -176,7 +177,7 @@ BackgroundManager::_WriteMessage()
 
 
 status_t
-BackgroundManager::GetWorkspaceInfo(int32 workspace, BString& path, int32* mode, BPoint* offset, bool* erase)
+BackgroundManager::GetWorkspaceInfo(int32 workspace, BString& path, int32* mode, BPoint* offset, bool* erase, rgb_color* color)
 {
 	int32 messageIndex = _FindWorkspaceIndex(workspace);
 	// use the global defaults if we're asked for info of a workspace without customization
@@ -198,6 +199,9 @@ BackgroundManager::GetWorkspaceInfo(int32 workspace, BString& path, int32* mode,
 	if (erase != nullptr && fBackgroundMessage->FindBool(B_BACKGROUND_ERASE_TEXT, messageIndex, erase) != B_OK)
 		std::cerr << "Text Outline: Not found, using default!" << std::endl;
 
+	if (workspace != 0 && color != nullptr && BScreen().IsValid())
+		*color = BScreen().DesktopColor(workspace - 1);
+
 	return B_OK;
 }
 
@@ -209,8 +213,9 @@ BackgroundManager::PrintBackgroundToStream(int32 workspace, bool verbose)
 	int32 mode = B_BACKGROUND_MODE_SCALED;
 	BPoint offset;
 	bool erase = true;
+	rgb_color color;
 
-	if (GetWorkspaceInfo(workspace, path, &mode, &offset, &erase) != B_OK)
+	if (GetWorkspaceInfo(workspace, path, &mode, &offset, &erase, &color) != B_OK)
 		return B_ERROR;
 
 	if (verbose) {
@@ -263,6 +268,9 @@ BackgroundManager::PrintBackgroundToStream(int32 workspace, bool verbose)
 	std::cout << "Offset: X=" << offset.x << " Y=" << offset.y << std::endl;
 
 	std::cout << "Text Outline: " << (erase ? "true" : "false") << std::endl;
+
+	if (workspace != 0)
+		std::cout << "Background Color: {r:" << +color.red << ",g:" << +color.green << ",b:" << +color.blue << "}" << std::endl;
 
 	std::cout << std::endl;
 
@@ -374,6 +382,26 @@ BackgroundManager::SetOffset(int32 x, int32 y, int32 workspace)
 	}
 
 	fDirtyMessage = true;
+	return B_OK;
+}
+
+
+status_t
+BackgroundManager::SetColor(rgb_color color, int32 workspace)
+{
+	// do our own checking here because SetColor doesn't call _FindWorkspaceIndex()
+	if (workspace < 1 || workspace > 33) {
+		std::cerr << "Error: invalid workspace #" << std::endl;
+		return B_ERROR;
+	}
+	if (!BScreen().IsValid()) {
+		std::cerr << "Error: unable to get BScreen" << std::endl;
+		return B_ERROR;
+	}
+
+	// TODO call SetDesktopColor() inside of Flush()?
+	BScreen().SetDesktopColor(color, (uint32)(workspace - 1));
+
 	return B_OK;
 }
 

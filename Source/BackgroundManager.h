@@ -6,6 +6,7 @@ class BNode;
 class BMessage;
 class BPoint;
 class BString;
+struct rgb_color;
 
 
 class BackgroundManager {
@@ -17,7 +18,7 @@ public:
 
 	status_t ResetWorkspace(int32 workspace);
 
-	status_t GetWorkspaceInfo(int32 workspace, BString& path, int32* mode = nullptr, BPoint* offset = nullptr, bool* erase = nullptr);
+	status_t GetWorkspaceInfo(int32 workspace, BString& path, int32* mode = nullptr, BPoint* offset = nullptr, bool* erase = nullptr, rgb_color* = nullptr);
 
 	status_t SetBackground(const char* imagePath, int32 workspace);
 
@@ -28,6 +29,8 @@ public:
 	status_t SetOutline(bool enabled, int32 workspace);
 
 	status_t SetOffset(int32 x, int32 y, int32 workspace);
+
+	status_t SetColor(rgb_color color, int32 workspace);
 
 	status_t Flush();
 

@@ -52,7 +52,7 @@ Subcommands:
 
 ### `set` command help output (i.e. `bgswitch set -h`):
 ```console
-Usage: set [--help] [--file VAR] [--mode VAR] [--text] [--notext] [--offset VAR...]
+Usage: set [--help] [--file VAR] [--mode VAR] [--text] [--notext] [--offset VAR...] [--color VAR...]
 
 Set workspace background options
 
@@ -63,6 +63,7 @@ Optional arguments:
   -t, --text    Enable text outline
   -n, --notext  Disable text outline
   -o, --offset  X/Y offset in manual placement mode, separated by a space (ex. -o 200 400)
+  -c, --color   Set background RGB color, separated by a space (ex. -c 20 100 255)
 
 Specify one or more of the file/mode/text/offset options
 ```
@@ -129,4 +130,4 @@ bgswitch -w 0 set -f /path/to/file.jpg
 bgswitch -w 0 set -m 1 -o 0 0
 ```
 *Note: Changing even one thing of a regular workspace will cause it to stop following the global defaults and keep its own settings
-until it is `reset`.*
+until it is `reset`. (Color is handled differently by the system and not included in this)*
