@@ -7,44 +7,49 @@ A small command line tool to change the desktop background on [Haiku](https://ha
 
 The `help` output:
 ```
-Usage: bgswitch [--help] [--all] [--workspace VAR] [--verbose] [--debug] {clear,list,set}
+Usage: bgswitch [--help] [--all] [--workspace VAR] [--verbose] [--debug] {clear,list,reset,set}
 
 Get/Set workspace backgrounds.
 
 Optional arguments:
   -h, --help       shows help message and exits
-  -a, --all        Get/Set/Clear all workspaces at once
-  -w, --workspace  The workspace # to get/set/clear, otherwise use the current workspace [default: -1]
+  -a, --all        Modify all workspaces at once
+  -w, --workspace  The workspace # to modify, otherwise use the current workspace [default: -1]
   -v, --verbose    Print extra output to screen
   -d, --debug      Print debugging output to screen
 
 Subcommands:
-  clear           Clear workspace background
+  clear           Make background empty (same effect as: set "")
   list            List background information
-  set             Set workspace background
+  reset           Reset background to global default
+  set             Set background
 ```
 
 ### Getting/Setting/Clearing A Background
 
 For all workspaces:
 ```
-bgswitch -a list
-bgswitch -a set /path/to/file.jpg
 bgswitch -a clear
+bgswitch -a list
+bgswitch -a reset
+bgswitch -a set /path/to/file.jpg
 ```
 
 For one specific workspace (#2 in this case):
 ```
-bgswitch -w 2 list
-bgswitch -w 2 set /path/to/file.jpg
 bgswitch -w 2 clear
+bgswitch -w 2 list
+bgswitch -w 2 reset
+bgswitch -w 2 set /path/to/file.jpg
 ```
+*The global defaults can be changed by modifying workspace 0.  These will be used for any workspaces that have not been changed*
 
 For the current workspace:
 ```
-bgswitch list
-bgswitch set /path/to/file.jpg
 bgswitch clear
+bgswitch list
+bgswitch reset
+bgswitch set /path/to/file.jpg
 ```
 
 *Any type of image file can be used if Haiku has a data translator installed(jpg,png,webp,...)*
