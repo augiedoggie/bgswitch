@@ -1,6 +1,6 @@
 # bgswitch
 
-A small command line tool to change the desktop background on [Haiku](https://haiku-os.org).  This allows creating scripts that will rotate the background.
+A small command line tool to change the desktop background on [Haiku](https://www.haiku-os.org).  This allows creating scripts that will rotate the background.
 
 
 ## Running
@@ -72,5 +72,4 @@ bgswitch set /path/to/file.jpg
 
 
 ### ToDo Items
-- Allow setting a wallpaper if the workspace doesn't already have one set.
 - Allow changing the scaling mode, offset, and text outline
