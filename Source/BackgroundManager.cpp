@@ -203,8 +203,10 @@ BackgroundManager::DumpBackground(int32 workspace, bool verbose)
 	if (path.IsEmpty()) {
 		if (verbose)
 			std::cout << "File: No background set!" << std::endl;
-		else
+		else {
+			std::cout << "<none>" << std::endl;
 			return B_OK;
+		}
 	} else if (!verbose) {
 		std::cout << path << std::endl;
 		return B_OK;
