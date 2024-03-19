@@ -55,6 +55,8 @@ main(int argc, char** argv)
 		.default_value(false)
 		.implicit_value(true);
 
+	program.add_epilog("Project page with examples: https://github.com/augiedoggie/bgswitch");
+
 	argparse::ArgumentParser list_command("list", "1.0", argparse::default_arguments::help);
 	list_command.add_description("List background information");
 
