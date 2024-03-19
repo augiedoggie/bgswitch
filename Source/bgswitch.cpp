@@ -44,8 +44,7 @@ main(int argc, char** argv)
 		.implicit_value(true);
 	program.add_argument("-w", "--workspace")
 		.help("The workspace # to modify, otherwise use the current workspace")
-		.scan<'i', int>()
-		.default_value(-1);
+		.scan<'i', int>();
 	program.add_argument("-v", "--verbose")
 		.help("Print extra output to screen")
 		.default_value(false)
@@ -102,11 +101,11 @@ main(int argc, char** argv)
 	int32 workspace = 1;
 
 	if (program["all"] == false) {
-		workspace = program.get<int>("workspace");
-		if (workspace == -1)
-			workspace = current_workspace() + 1;
-		else
+		if (program.is_used("workspace")) {
+			workspace = program.get<int>("workspace");
 			_check_workspace(workspace);
+		} else
+			workspace = current_workspace() + 1;
 
 		maxWorkspace = workspace;
 	}
