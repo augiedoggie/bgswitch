@@ -100,7 +100,7 @@ def rotate(workspace, bg_slice)
   @log.info("Workspace #{workspace} [#{bg_slice.length} left]: #{the_wall}")
 
   # execute our bgswitch command
-  `#{defined?(BGSWITCH) ? BGSWITCH : 'bgswitch'} -w #{workspace} set #{defined?(QUERY_MODE) && QUERY_MODE ? the_wall : the_wall.shellescape}`
+  `#{defined?(BGSWITCH) ? BGSWITCH : 'bgswitch'} -w #{workspace} set -f #{defined?(QUERY_MODE) && QUERY_MODE ? the_wall : the_wall.shellescape}`
   # TODO: check error code from bgswitch
 end
 
