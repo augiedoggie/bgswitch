@@ -1,12 +1,14 @@
 # bgswitch
 
 A small command line tool to change the desktop background settings on [Haiku](https://www.haiku-os.org).
-This allows creating scripts that will rotate the background.
+It is possible to change the wallpaper, placement mode, offset/posistion, and text outline.  These settings
+can be changed for each individual workspace or all workspaces at once.  This allows creating scripts that
+will rotate the background.
 
 
 # Help Output
 
-### The main `help` output (i.e. `bgswitch -h`):
+### Main help output (i.e. `bgswitch -h`):
 ```console
 Usage: bgswitch [--help] [--all] [--workspace VAR] [--verbose] [--debug] {clear,list,reset,set}
 
@@ -20,13 +22,14 @@ Optional arguments:
   -d, --debug      Print debugging output to screen
 
 Subcommands:
-  clear           Make background empty (same effect as: set "")
+  clear           Make background empty (same effect as: set -f "")
   list            List background information
   reset           Reset background to global default
   set             Set background
 ```
 
-### The `help` output for the `set` command (i.e. `bgswitch set -h`):
+
+### `set` command help output (i.e. `bgswitch set -h`):
 ```console
 Usage: set [--help] [--file VAR] [--mode VAR] [--text] [--notext] [--offset VAR...]
 
