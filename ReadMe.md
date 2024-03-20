@@ -1,7 +1,7 @@
 # bgswitch
 
 A small command line tool to change the desktop background settings on [Haiku](https://www.haiku-os.org).
-It is possible to change the wallpaper, placement mode, offset/posistion, and text outline.  These settings
+It is possible to change the wallpaper, placement mode, offset/position, and text outline.  These settings
 can be changed for each individual workspace or all workspaces at once.  This allows creating scripts that
 will rotate the background.
 
