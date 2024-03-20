@@ -6,6 +6,29 @@ can be changed for each individual workspace or all workspaces at once.  This al
 will rotate the background.
 
 
+# Building
+
+## Using cmake
+
+This is the primary build system at the moment.
+
+```console
+~> cd bgswitch
+~/bgswitch> cmake .
+~/bgswitch> make
+```
+
+
+## Using jam
+
+You must have the `jamfile_engine` package installed.
+
+```console
+~> cd bgswitch
+~/bgswitch> jam
+```
+
+
 # Help Output
 
 ### Main help output (i.e. `bgswitch -h`):
@@ -108,26 +131,3 @@ bgswitch -w 0 set -m 1 -o 0 0
 ```
 *Note: Changing even one thing of a regular workspace will cause it to stop following the global defaults and keep its own settings
 until it is `reset`.*
-
-
-# Building
-
-## Using cmake
-
-This is the primary build system at the moment.
-
-```console
-~> cd bgswitch
-~/bgswitch> cmake .
-~/bgswitch> make
-```
-
-
-## Using jam
-
-You must have the `jamfile_engine` package installed.
-
-```console
-~> cd bgswitch
-~/bgswitch> jam
-```
