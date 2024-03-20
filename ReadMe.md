@@ -6,9 +6,7 @@ can be changed for each individual workspace or all workspaces at once.  This al
 will rotate the background.
 
 
-# Building
-
-## Using cmake
+## Build using cmake
 
 This is the primary build system at the moment.
 
@@ -19,7 +17,7 @@ This is the primary build system at the moment.
 ```
 
 
-## Using jam
+## Build using jam
 
 You must have the `jamfile_engine` package installed.
 
