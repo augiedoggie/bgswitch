@@ -290,7 +290,8 @@ BackgroundManager::ResetWorkspace(int32 workspace, bool verbose)
 	fBackgroundMessage->RemoveData(B_BACKGROUND_ERASE_TEXT, messageIndex);
 	fBackgroundMessage->RemoveData(BACKGROUND_SET, messageIndex);
 
-	return _WriteMessage();
+	fDirtyMessage = true;
+	return B_OK;
 }
 
 
