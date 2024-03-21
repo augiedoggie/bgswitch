@@ -365,10 +365,8 @@ BackgroundManager::SetOutline(bool enabled, int32 workspace, bool verbose)
 		std::cout << (enabled ? "Enabling" : "Disabling") << " text outline for workspace " << workspace << std::endl;
 
 	int32 messageIndex = _FindWorkspaceIndex(workspace, true);
-	if (messageIndex == B_ERROR) {
-		std::cerr << "Error: unable to create new message index" << std::endl;
+	if (messageIndex == B_ERROR)
 		return B_ERROR;
-	}
 
 	if (fBackgroundMessage->ReplaceBool(B_BACKGROUND_ERASE_TEXT, messageIndex, enabled) != B_OK) {
 		std::cerr << "Error: unable to replace outline mode in BMessage" << std::endl;
