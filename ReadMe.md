@@ -95,8 +95,8 @@ bgswitch -w 2 reset
 bgswitch -w 2 set -f /path/to/file.jpg
 # setting a file with manual mode, no text outline, and offset
 bgswitch -w 2 set -m 1 -n -o 600 400 -f /path/to/file.jpg
-# setting only the placement mode
-bgswitch -w 2 set -m 3
+# setting only tiled placement mode
+bgswitch -w 2 set -m 4
 ```
 
 
@@ -118,9 +118,10 @@ Workspace 0 holds the global default settings.  Any other workspaces which have 
 Workspace 0 does not show up in the `bgswitch -a list` output unless the `-v` option is used.  Specifying `-w 0` is the only way
 to change these global defaults as they are not changed when using the `-a` option.
 ```console
-bgswitch -v -a list
-bgswitch -v -w 0 list
+bgswitch -w 0 clear
 bgswitch -w 0 list
+bgswitch -v -w 0 list
+bgswitch -v -a list
 
 # setting a file
 bgswitch -w 0 set -f /path/to/file.jpg
