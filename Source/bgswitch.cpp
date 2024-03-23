@@ -108,8 +108,6 @@ main(int argc, char** argv)
 	if (programParser["debug"] == true)
 		bgManager.PrintToStream();
 
-	bool verbose = (programParser["verbose"] == true);
-
 	// a BApplication is needed for count_workspaces(), doesn't need to be running
 	BApplication App("application/x-vnd.cpr.bgswitch");
 
@@ -131,16 +129,16 @@ main(int argc, char** argv)
 		return 1;
 	}
 
+	bool verbose = (programParser["verbose"] == true);
+
 	if (programParser.is_subcommand_used("list")) {
-		// when listing all show the global defaults too
+		// show the global defaults only when listing all in verbose mode
 		if (verbose && programParser.is_used("all"))
 			workspace = 0;
 
-		for (int32 x = workspace; x <= maxWorkspace; x++) {
+		for (int32 x = workspace; x <= maxWorkspace; x++)
 			bgManager.PrintBackgroundToStream(x, verbose);
-			if (verbose)
-				std::cout << std::endl;
-		}
+
 		return 0;
 	} else if (programParser.is_subcommand_used("set")) {
 		// option sanity checking
@@ -152,8 +150,8 @@ main(int argc, char** argv)
 
 		// more option sanity checking
 		if (!setParser.is_used("file") && !setParser.is_used("mode")
-				&& !setParser.is_used("text") && !setParser.is_used("notext")
-				&& !setParser.is_used("offset")) {
+			&& !setParser.is_used("text") && !setParser.is_used("notext")
+			&& !setParser.is_used("offset")) {
 			std::cerr << "Error: must specify one of the file/mode/text/notext/offset options" << std::endl;
 			std::cerr << setParser << std::endl;
 			return 1;
@@ -162,35 +160,68 @@ main(int argc, char** argv)
 		for (int32 x = workspace; x <= maxWorkspace; x++) {
 			if (setParser.is_used("file")) {
 				std::string imagePath = setParser.get<std::string>("file");
-				if (bgManager.SetBackground(imagePath.c_str(), x, verbose) != B_OK)
+				if (verbose)
+					std::cout << "Setting workspace " << x << " background to "
+							<< (imagePath.length() == 0 ? "<none>" : imagePath)
+							<< std::endl;
+
+				if (bgManager.SetBackground(imagePath.c_str(), x) != B_OK)
 					return 1;
 			}
 
-			if (setParser.is_used("text") && bgManager.SetOutline(true, x, verbose) != B_OK)
-				return 1;
+			if (setParser.is_used("text")) {
+				if (verbose)
+					std::cout << "Enabling text outline for workspace " << x << std::endl;
+				if (bgManager.SetOutline(true, x) != B_OK)
+					return 1;
+			}
 
-			if (setParser.is_used("notext") && bgManager.SetOutline(false, x, verbose) != B_OK)
-				return 1;
+			if (setParser.is_used("notext")) {
+				if (verbose)
+					std::cout << "Disabling text outline for workspace " << x << std::endl;
+				if (bgManager.SetOutline(false, x) != B_OK)
+					return 1;
+			}
 
 			if (setParser.is_used("offset")) {
 				auto offset = setParser.get<std::vector<int>>("offset");
-				if (bgManager.SetOffset(offset[0], offset[1], x, verbose) != B_OK)
+				if (verbose)
+					std::cout << "Setting X/Y offset to " << offset[0] << "/" << offset[1] << " for workspace " << x << std::endl;
+				if (bgManager.SetOffset(offset[0], offset[1], x) != B_OK)
 					return 1;
 			}
 
 			if (setParser.is_used("mode")) {
 				int32 mode = 0;
+
 				switch (setParser.get<int>("mode")) {
-					case 1: mode = B_BACKGROUND_MODE_USE_ORIGIN; break;
-					case 2: mode = B_BACKGROUND_MODE_CENTERED; break;
-					case 3: mode = B_BACKGROUND_MODE_SCALED; break;
-					case 4: mode = B_BACKGROUND_MODE_TILED; break;
+					case 1:
+						if (verbose)
+							std::cout << "Setting placement mode to <manual> for workspace " << x << std::endl;
+						mode = B_BACKGROUND_MODE_USE_ORIGIN;
+						break;
+					case 2:
+						if (verbose)
+							std::cout << "Setting placement mode to <centered> for workspace " << x << std::endl;
+						mode = B_BACKGROUND_MODE_CENTERED;
+						break;
+					case 3:
+						if (verbose)
+							std::cout << "Setting placement mode to <scaled> for workspace " << x << std::endl;
+						mode = B_BACKGROUND_MODE_SCALED;
+						break;
+					case 4:
+						if (verbose)
+							std::cout << "Setting placement mode to <tiled> for workspace " << x << std::endl;
+						mode = B_BACKGROUND_MODE_TILED;
+						break;
 					default:
 						std::cerr << "Error: invalid placement mode, must be one of 1/2/3/4" << std::endl;
 						std::cerr << setParser << std::endl;
 						return 1;
 				}
-				if (bgManager.SetPlacement(mode, x, verbose) != B_OK)
+
+				if (bgManager.SetPlacement(mode, x) != B_OK)
 					return 1;
 			}
 		}
@@ -204,10 +235,15 @@ main(int argc, char** argv)
 		}
 
 		for (int32 x = workspace; x <= maxWorkspace; x++) {
-			if (programParser.is_subcommand_used("reset"))
-				bgManager.ResetWorkspace(x, verbose);
-			else
-				bgManager.SetBackground(nullptr, x, verbose);
+			if (programParser.is_subcommand_used("reset")) {
+				if (verbose)
+					std::cout << "Resetting workspace " << workspace << " to global default" << std::endl;
+				bgManager.ResetWorkspace(x);
+			} else {
+				if (verbose)
+					std::cout << "Clearing workspace " << workspace << std::endl;
+				bgManager.SetBackground(nullptr, x);
+			}
 		}
 
 		bgManager.Flush();

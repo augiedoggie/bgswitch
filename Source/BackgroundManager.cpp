@@ -264,16 +264,15 @@ BackgroundManager::PrintBackgroundToStream(int32 workspace, bool verbose)
 
 	std::cout << "Text Outline: " << (erase ? "true" : "false") << std::endl;
 
+	std::cout << std::endl;
+
 	return B_OK;
 }
 
 
 status_t
-BackgroundManager::ResetWorkspace(int32 workspace, bool verbose)
+BackgroundManager::ResetWorkspace(int32 workspace)
 {
-	if (verbose)
-		std::cout << "Resetting workspace " << workspace << " to global default" << std::endl;
-
 	int32 messageIndex = _FindWorkspaceIndex(workspace);
 	if (messageIndex < 0)
 		return B_ERROR;
@@ -296,13 +295,8 @@ BackgroundManager::ResetWorkspace(int32 workspace, bool verbose)
 
 
 status_t
-BackgroundManager::SetBackground(const char* imagePath, int32 workspace, bool verbose)
+BackgroundManager::SetBackground(const char* imagePath, int32 workspace)
 {
-	if (verbose)
-		std::cout << "Setting workspace " << workspace << " to "
-			<< ((imagePath == nullptr || strcmp(imagePath, "") == 0) ? "<none>" : imagePath)
-			<< std::endl;
-
 	int32 messageIndex = _FindWorkspaceIndex(workspace, true);
 	if (messageIndex == B_ERROR)
 		return B_ERROR;
@@ -327,22 +321,14 @@ BackgroundManager::SetBackground(const char* imagePath, int32 workspace, bool ve
 
 
 status_t
-BackgroundManager::SetPlacement(int32 mode, int32 workspace, bool verbose)
+BackgroundManager::SetPlacement(int32 mode, int32 workspace)
 {
-	if (verbose)
-		std::cout << "Setting placement mode to ";
-
-	switch (mode) {
-		case B_BACKGROUND_MODE_USE_ORIGIN: if (verbose) std::cout << "<manual>"; break;
-		case B_BACKGROUND_MODE_CENTERED: if (verbose) std::cout << "<centered>"; break;
-		case B_BACKGROUND_MODE_SCALED: if (verbose) std::cout << "<scaled>"; break;
-		case B_BACKGROUND_MODE_TILED: if (verbose) std::cout << "<tiled>"; break;
-		default:
-			std::cerr << "Error: invalid placement mode" << std::endl;
-			return B_ERROR;
+	// verify we were given a valid mode
+	if (mode != B_BACKGROUND_MODE_USE_ORIGIN && mode != B_BACKGROUND_MODE_CENTERED
+		&& mode != B_BACKGROUND_MODE_SCALED && mode != B_BACKGROUND_MODE_TILED) {
+		std::cerr << "Error: invalid placement mode" << std::endl;
+		return B_ERROR;
 	}
-	if (verbose)
-		std::cout << " for workspace " << workspace << std::endl;
 
 	int32 messageIndex = _FindWorkspaceIndex(workspace, true);
 	if (messageIndex == B_ERROR)
@@ -359,11 +345,8 @@ BackgroundManager::SetPlacement(int32 mode, int32 workspace, bool verbose)
 
 
 status_t
-BackgroundManager::SetOutline(bool enabled, int32 workspace, bool verbose)
+BackgroundManager::SetOutline(bool enabled, int32 workspace)
 {
-	if (verbose)
-		std::cout << (enabled ? "Enabling" : "Disabling") << " text outline for workspace " << workspace << std::endl;
-
 	int32 messageIndex = _FindWorkspaceIndex(workspace, true);
 	if (messageIndex == B_ERROR)
 		return B_ERROR;
@@ -379,11 +362,8 @@ BackgroundManager::SetOutline(bool enabled, int32 workspace, bool verbose)
 
 
 status_t
-BackgroundManager::SetOffset(int32 x, int32 y, int32 workspace, bool verbose)
+BackgroundManager::SetOffset(int32 x, int32 y, int32 workspace)
 {
-	if (verbose)
-		std::cout << "Setting X/Y offset to " << x << "/" << y << " for workspace " << workspace << std::endl;
-
 	int32 messageIndex = _FindWorkspaceIndex(workspace, true);
 	if (messageIndex == B_ERROR)
 		return B_ERROR;

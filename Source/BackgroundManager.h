@@ -15,19 +15,19 @@ public:
 
 	status_t InitCheck();
 
-	status_t ResetWorkspace(int32 workspace, bool verbose = false);
+	status_t ResetWorkspace(int32 workspace);
 
 	status_t GetWorkspaceInfo(int32 workspace, BString& path, int32* mode = nullptr, BPoint* offset = nullptr, bool* erase = nullptr);
 
-	status_t SetBackground(const char* imagePath, int32 workspace, bool verbose = false);
+	status_t SetBackground(const char* imagePath, int32 workspace);
 
 	status_t PrintBackgroundToStream(int32 workspace, bool verbose = false);
 
-	status_t SetPlacement(int32 mode, int32 workspace, bool verbose = false);
+	status_t SetPlacement(int32 mode, int32 workspace);
 
-	status_t SetOutline(bool enabled, int32 workspace, bool verbose = false);
+	status_t SetOutline(bool enabled, int32 workspace);
 
-	status_t SetOffset(int32 x, int32 y, int32 workspace, bool verbose = false);
+	status_t SetOffset(int32 x, int32 y, int32 workspace);
 
 	status_t Flush();
 
