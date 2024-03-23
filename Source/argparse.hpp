@@ -704,6 +704,7 @@ public:
       }
     }
 
+#if 0
     // print nargs spec
     if (!argument.m_help.empty()) {
       stream << " ";
@@ -716,6 +717,7 @@ public:
     } else if (argument.m_is_required) {
       stream << "[required]";
     }
+#endif
     stream << "\n";
     return stream;
   }

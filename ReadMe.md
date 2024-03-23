@@ -33,12 +33,12 @@ You must have the `jamfile_engine` package installed.
 ```console
 Usage: bgswitch [--help] [--all] [--workspace VAR] [--verbose] [--debug] {clear,list,reset,set}
 
-Get/Set workspace backgrounds.
+Get/Set workspace backgrounds
 
 Optional arguments:
   -h, --help       shows help message and exits
   -a, --all        Modify all workspaces at once
-  -w, --workspace  The workspace # to modify, otherwise use the current workspace [default: -1]
+  -w, --workspace  The workspace # to modify, otherwise use the current workspace
   -v, --verbose    Print extra output to screen
   -d, --debug      Print debugging output to screen
 
@@ -46,7 +46,7 @@ Subcommands:
   clear           Make background empty (same effect as: set -f "")
   list            List background information
   reset           Reset background to global default
-  set             Set background
+  set             Set workspace background options
 ```
 
 
@@ -58,11 +58,11 @@ Set workspace background options
 
 Optional arguments:
   -h, --help    shows help message and exits
-  -f, --file    Path to the image file (ex. -f /path/to/file.jpg) [default: ""]
+  -f, --file    Path to the image file (ex. -f /path/to/file.jpg)
   -m, --mode    Placement mode 1=Manual/2=Center/3=Scale/4=Tile (ex. -m 3)
   -t, --text    Enable text outline
   -n, --notext  Disable text outline
-  -o, --offset  X/Y offset in manual placement mode, separated by a space (ex. -o 200 400) [nargs: 2]
+  -o, --offset  X/Y offset in manual placement mode, separated by a space (ex. -o 200 400)
 
 Specify one or more of the file/mode/text/offset options
 ```
