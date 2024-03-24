@@ -45,8 +45,8 @@ main(int argc, char** argv)
 		.default_value(false)
 		.implicit_value(true);
 	programParser.add_argument("-w", "--workspace")
-		.help("The workspace # to modify, otherwise use the current workspace")
-		.scan<'i', int>();
+		.help("The workspace # to modify, otherwise use the current workspace (ex. -w 2)")
+		.scan<'i', int32>();
 	programParser.add_argument("-v", "--verbose")
 		.help("Print extra output to screen")
 		.default_value(false)
@@ -67,7 +67,7 @@ main(int argc, char** argv)
 		.default_value(std::string{});
 	setParser.add_argument("-m", "--mode")
 		.help("Placement mode 1=Manual/2=Center/3=Scale/4=Tile (ex. -m 3)")
-		.scan<'i', int>();
+		.scan<'u', uint8>();
 	setParser.add_argument("-t", "--text")
 		.help("Enable text outline")
 		.default_value(false)
@@ -78,7 +78,7 @@ main(int argc, char** argv)
 		.implicit_value(true);
 	setParser.add_argument("-o", "--offset")
 		.help("X/Y offset in manual placement mode, separated by a space (ex. -o 200 400)")
-		.scan<'i', int>()
+		.scan<'i', int32>()
 		.nargs(2);
 
 	argparse::ArgumentParser clearParser("clear", "1.0", argparse::default_arguments::help);
@@ -116,7 +116,7 @@ main(int argc, char** argv)
 
 	if (programParser["all"] == false) {
 		if (programParser.is_used("workspace")) {
-			workspace = programParser.get<int>("workspace");
+			workspace = programParser.get<int32>("workspace");
 			_check_workspace(workspace);
 		} else
 			workspace = current_workspace() + 1;
@@ -184,7 +184,7 @@ main(int argc, char** argv)
 			}
 
 			if (setParser.is_used("offset")) {
-				auto offset = setParser.get<std::vector<int>>("offset");
+				auto offset = setParser.get<std::vector<int32>>("offset");
 				if (verbose)
 					std::cout << "Setting X/Y offset to " << offset[0] << "/" << offset[1] << " for workspace " << x << std::endl;
 				if (bgManager.SetOffset(offset[0], offset[1], x) != B_OK)
@@ -194,7 +194,7 @@ main(int argc, char** argv)
 			if (setParser.is_used("mode")) {
 				int32 mode = 0;
 
-				switch (setParser.get<int>("mode")) {
+				switch (setParser.get<uint8>("mode")) {
 					case 1:
 						if (verbose)
 							std::cout << "Setting placement mode to <manual> for workspace " << x << std::endl;
