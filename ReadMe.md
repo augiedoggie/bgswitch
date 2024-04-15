@@ -1,4 +1,4 @@
-# bgswitch
+# bgswitch &nbsp; &nbsp; [![Haiku-CI](https://github.com/augiedoggie/bgswitch/actions/workflows/build.yml/badge.svg)](https://github.com/augiedoggie/bgswitch/actions/workflows/build.yml)
 
 A small command line tool to change the desktop background settings on [Haiku](https://www.haiku-os.org).
 It is possible to change the wallpaper, placement mode, offset/position, and text outline.  These settings
