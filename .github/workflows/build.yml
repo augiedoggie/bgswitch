@@ -25,11 +25,12 @@ jobs:
           version: ${{ matrix.config.version }}
           architecture: ${{ matrix.config.architecture }}
           run: |
-            ssh user@localhost "pkgman update -y haiku_devel devel:libicuuc cmd:cmake cmd:gcc cmd:as cmd:make" 
             if [[ `uname -m` == BePC ]]; then
-              setarch x86 cmake -B build -S .
+              ssh user@localhost "pkgman update -y haiku_x86_devel cmd:cmake cmd:gcc_x86 cmd:as_x86 cmd:make" &&
+              setarch x86 cmake -B build -S . &&
               setarch x86 make -C build
             else
-              cmake -B build -S .
+              ssh user@localhost "pkgman update -y haiku_devel cmd:cmake cmd:gcc cmd:as cmd:make" &&
+              cmake -B build -S . &&
               make -C build
             fi
