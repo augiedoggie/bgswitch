@@ -18,7 +18,7 @@ BackgroundManager::BackgroundManager(const char* path)
 	:
 	fBackgroundMessage(nullptr),
 	fFolderNode(nullptr),
-	fInitStatus(B_ERROR),
+	fInitStatus(B_NO_INIT),
 	fDirtyMessage(false)
 {
 	BPath folderPath;
@@ -77,7 +77,29 @@ BackgroundManager::InitCheck()
 status_t
 BackgroundManager::_RemoveWorkspaceIndex(int32 workspace)
 {
-	int32 setWorkspaces = 0;
+	int32 messageIndex = _FindWorkspaceIndex(workspace, false);
+	// we don't allow removing workspace 0
+	if (messageIndex < B_OK || workspace == 0) {
+		std::cerr << "Error: invalid workspace #" << std::endl;
+		return B_BAD_VALUE;
+	}
+
+	int32 setWorkspaces = fBackgroundMessage->GetInt32(B_BACKGROUND_WORKSPACES, messageIndex, 0);
+	// clear the bit for this workspace
+	setWorkspaces &= ~(1 << (workspace - 1));
+	if (setWorkspaces != 0) {
+		// some other workspace is using this index, keep it around
+		fBackgroundMessage->ReplaceInt32(B_BACKGROUND_WORKSPACES, messageIndex, setWorkspaces);
+	} else {
+		// the index is no longer used, remove it
+		fBackgroundMessage->RemoveData(B_BACKGROUND_WORKSPACES, messageIndex);
+		fBackgroundMessage->RemoveData(B_BACKGROUND_IMAGE, messageIndex);
+		fBackgroundMessage->RemoveData(B_BACKGROUND_MODE, messageIndex);
+		fBackgroundMessage->RemoveData(B_BACKGROUND_ORIGIN, messageIndex);
+		fBackgroundMessage->RemoveData(B_BACKGROUND_ERASE_TEXT, messageIndex);
+		fBackgroundMessage->RemoveData(BACKGROUND_SET, messageIndex);
+	}
+
 	if (fBackgroundMessage->FindInt32(B_BACKGROUND_WORKSPACES, 0, &setWorkspaces) != B_OK) {
 		std::cerr << "Error: Unable to find B_BACKGROUND_WORKSPACES BMessage" << std::endl;
 		return B_ERROR;
@@ -89,6 +111,7 @@ BackgroundManager::_RemoveWorkspaceIndex(int32 workspace)
 		std::cerr << "Error: Unable to replace B_BACKGROUND_WORKSPACES BMessage" << std::endl;
 		return B_ERROR;
 	}
+
 	return B_OK;
 }
 
@@ -96,6 +119,11 @@ BackgroundManager::_RemoveWorkspaceIndex(int32 workspace)
 int32
 BackgroundManager::_FindWorkspaceIndex(int32 workspace, bool create)
 {
+	if (workspace < 0 || workspace > 32) {
+		std::cerr << "Error: invalid workspace #" << std::endl;
+		return B_BAD_VALUE;
+	}
+
 	// we're adjusting the global/default background
 	if (workspace == 0)
 		return 0;
@@ -120,8 +148,8 @@ BackgroundManager::_FindWorkspaceIndex(int32 workspace, bool create)
 	// we're switching from global to a locally set background, find the next free index
 	int32 newIndex = _CreateWorkspaceIndex(workspace);
 
-	if (newIndex == B_ERROR)
-		return B_ERROR;
+	if (newIndex < B_OK)
+		return newIndex;
 
 	//  get our default values from index 0
 	fBackgroundMessage->AddInt32(B_BACKGROUND_WORKSPACES, (1 << (workspace - 1)));
@@ -138,6 +166,12 @@ BackgroundManager::_FindWorkspaceIndex(int32 workspace, bool create)
 int32
 BackgroundManager::_CreateWorkspaceIndex(int32 workspace)
 {
+	// start at 1 because we don't allow creating workspace 0
+	if (workspace < 1 || workspace > 32) {
+		std::cerr << "Error: invalid workspace #" << std::endl;
+		return B_BAD_VALUE;
+	}
+
 	int32 countFound = 0;
 	fBackgroundMessage->GetInfo(B_BACKGROUND_WORKSPACES, nullptr, &countFound);
 
@@ -222,13 +256,13 @@ BackgroundManager::PrintBackgroundToStream(int32 workspace, bool verbose)
 		std::cout << "Workspace: " << workspace;
 		if (workspace == 0)
 			std::cout << " *Global Default*";
-		else if (_FindWorkspaceIndex(workspace) == B_ERROR)
+		else if (_FindWorkspaceIndex(workspace) < B_OK)
 			std::cout << " **Warning: No custom settings.  Showing Global Defaults**";
 		std::cout << std::endl;
 	} else {
 		// mark the global workspace and workspaces which are using it with an asterisk
 		std::cout << workspace;
-		if (workspace == 0 || _FindWorkspaceIndex(workspace) == B_ERROR)
+		if (workspace == 0 || _FindWorkspaceIndex(workspace) < B_OK)
 			std::cout << "*";
 		std::cout << ": ";
 	}
@@ -282,20 +316,11 @@ status_t
 BackgroundManager::ResetWorkspace(int32 workspace)
 {
 	int32 messageIndex = _FindWorkspaceIndex(workspace);
-	if (messageIndex < 0)
-		return B_ERROR;
+	if (messageIndex < B_OK)
+		return messageIndex;
 
-	if (_RemoveWorkspaceIndex(workspace) != B_OK)
-		return B_ERROR;
-
-	// TODO check B_BACKGROUND_WORKSPACES to ensure no other workspaces are using this index
-	// TODO if so we can just adjust it and leave the rest of the data
-	fBackgroundMessage->RemoveData(B_BACKGROUND_WORKSPACES, messageIndex);
-	fBackgroundMessage->RemoveData(B_BACKGROUND_IMAGE, messageIndex);
-	fBackgroundMessage->RemoveData(B_BACKGROUND_MODE, messageIndex);
-	fBackgroundMessage->RemoveData(B_BACKGROUND_ORIGIN, messageIndex);
-	fBackgroundMessage->RemoveData(B_BACKGROUND_ERASE_TEXT, messageIndex);
-	fBackgroundMessage->RemoveData(BACKGROUND_SET, messageIndex);
+	if (status_t status = _RemoveWorkspaceIndex(workspace) != B_OK)
+		return status;
 
 	fDirtyMessage = true;
 	return B_OK;
@@ -306,8 +331,8 @@ status_t
 BackgroundManager::SetBackground(const char* imagePath, int32 workspace)
 {
 	int32 messageIndex = _FindWorkspaceIndex(workspace, true);
-	if (messageIndex == B_ERROR)
-		return B_ERROR;
+	if (messageIndex < B_OK)
+		return messageIndex;
 
 	// verify the file exists if we were given a non-empty path
 	if (imagePath != nullptr && strcmp(imagePath, "") != 0) {
@@ -335,12 +360,12 @@ BackgroundManager::SetPlacement(int32 mode, int32 workspace)
 	if (mode != B_BACKGROUND_MODE_USE_ORIGIN && mode != B_BACKGROUND_MODE_CENTERED
 		&& mode != B_BACKGROUND_MODE_SCALED && mode != B_BACKGROUND_MODE_TILED) {
 		std::cerr << "Error: invalid placement mode" << std::endl;
-		return B_ERROR;
+		return B_BAD_VALUE;
 	}
 
 	int32 messageIndex = _FindWorkspaceIndex(workspace, true);
-	if (messageIndex == B_ERROR)
-		return B_ERROR;
+	if (messageIndex < B_OK)
+		return messageIndex;
 
 	if (fBackgroundMessage->ReplaceInt32(B_BACKGROUND_MODE, messageIndex, mode) != B_OK) {
 		std::cerr << "Error: unable to replace background mode in BMessage" << std::endl;
@@ -356,8 +381,8 @@ status_t
 BackgroundManager::SetOutline(bool enabled, int32 workspace)
 {
 	int32 messageIndex = _FindWorkspaceIndex(workspace, true);
-	if (messageIndex == B_ERROR)
-		return B_ERROR;
+	if (messageIndex < B_OK)
+		return messageIndex;
 
 	if (fBackgroundMessage->ReplaceBool(B_BACKGROUND_ERASE_TEXT, messageIndex, enabled) != B_OK) {
 		std::cerr << "Error: unable to replace outline mode in BMessage" << std::endl;
@@ -373,8 +398,8 @@ status_t
 BackgroundManager::SetOffset(int32 x, int32 y, int32 workspace)
 {
 	int32 messageIndex = _FindWorkspaceIndex(workspace, true);
-	if (messageIndex == B_ERROR)
-		return B_ERROR;
+	if (messageIndex < B_OK)
+		return messageIndex;
 
 	if (fBackgroundMessage->ReplacePoint(B_BACKGROUND_ORIGIN, messageIndex, BPoint(x, y)) != B_OK) {
 		std::cerr << "Error: unable to replace offset in BMessage" << std::endl;
@@ -389,17 +414,15 @@ BackgroundManager::SetOffset(int32 x, int32 y, int32 workspace)
 status_t
 BackgroundManager::SetColor(rgb_color color, int32 workspace)
 {
-	// do our own checking here because SetColor doesn't call _FindWorkspaceIndex()
-	if (workspace < 1 || workspace > 33) {
+	if (workspace < 1 || workspace > 32) {
 		std::cerr << "Error: invalid workspace #" << std::endl;
-		return B_ERROR;
+		return B_BAD_VALUE;
 	}
 	if (!BScreen().IsValid()) {
 		std::cerr << "Error: unable to get BScreen" << std::endl;
 		return B_ERROR;
 	}
 
-	// TODO call SetDesktopColor() inside of Flush()?
 	BScreen().SetDesktopColor(color, (uint32)(workspace - 1));
 
 	return B_OK;
