@@ -249,11 +249,11 @@ main(int argc, char** argv)
 		for (int32 x = workspace; x <= maxWorkspace; x++) {
 			if (programParser.is_subcommand_used("reset")) {
 				if (verbose)
-					std::cout << "Resetting workspace " << workspace << " to global default" << std::endl;
+					std::cout << "Resetting workspace " << x << " to global default" << std::endl;
 				bgManager.ResetWorkspace(x);
 			} else {
 				if (verbose)
-					std::cout << "Clearing workspace " << workspace << std::endl;
+					std::cout << "Clearing workspace " << x << std::endl;
 				bgManager.SetBackground(nullptr, x);
 			}
 		}
