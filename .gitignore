@@ -1,26 +1,52 @@
-*.o
-*.a
-*.rsrc
-*~
+# -*- mode: gitignore; -*-
+
+### CMake ###
+CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles
-*.cmake
-*.make
+CMakeScripts
+Testing
 Makefile
+cmake_install.cmake
 install_manifest.txt
+CTestTestfile.cmake
+_deps
+
+
+### Ninja ###
+.ninja_deps
+.ninja_log
+
+
+### Tags ###
+# Ignore tags created by etags, ctags, gtags (GNU global), idutils, and cscope
+TAGS
+.TAGS
+!TAGS/
+tags
+.tags
+!tags/
+gtags.files
+GTAGS
+GRTAGS
+GPATH
+GSYMS
+ID
+cscope.files
+cscope.out
+cscope.in.out
+cscope.po.out
+
+
+### Common Project Files ###
 compile_commands.json
-CMakeLists.txt.user
-Source/build*
-build*
-obj.X86
-.ninja*
 .dir-locals.el
 .ignore
 .cache
 .ccls-cache
-.clang-format
-GPATH
-GRTAGS
-GTAGS
-ID
+
+
+### Custom Project Files ###
+build*
+obj.X86
 bgswitch
