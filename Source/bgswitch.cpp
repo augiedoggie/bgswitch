@@ -233,7 +233,7 @@ main(int argc, char** argv)
 				auto colorVec = setParser.get<std::vector<uint8>>("color");
 				if (verbose)
 					std::cout << "Setting RGB color to {r:" << +colorVec[0] << ",g:" << +colorVec[1] << ",b:" << +colorVec[2] << "} for workspace " << x << std::endl;
-				if (bgManager.SetColor((rgb_color){colorVec[0], colorVec[1], colorVec[2]}, x) != B_OK)
+				if (bgManager.SetColor((rgb_color){colorVec[0], colorVec[1], colorVec[2], 255}, x) != B_OK)
 					return 1;
 			}
 		}
