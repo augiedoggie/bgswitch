@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2024 Chris Roberts
+
+
 #include "BackgroundManager.h"
 #include "argparse.hpp"
 

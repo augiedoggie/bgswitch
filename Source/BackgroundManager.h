@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2024 Chris Roberts
+
 
 #include <SupportDefs.h>
 

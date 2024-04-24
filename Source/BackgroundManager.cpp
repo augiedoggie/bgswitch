@@ -1,6 +1,10 @@
 #include "BackgroundManager.h"
 
 #include <FindDirectory.h>
+// SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2024 Chris Roberts
+
+
 #include <Messenger.h>
 #include <Node.h>
 #include <Path.h>
