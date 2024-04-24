@@ -48,7 +48,7 @@ main(int argc, char** argv)
 	programParser.add_description("Adjust workspace background settings");
 	std::string epilog = "Project page: https://github.com/augiedoggie/bgswitch";
 #ifdef DOCS_DIR
-	epilog += "\nDocumentation & examples: " QUOTE(DOCS_DIR) "/ReadMe.html";
+	epilog += "\nDocumentation & examples: " QUOTE(DOCS_DIR) "/UserGuide/index.html";
 #endif
 	programParser.add_epilog(epilog);
 	programParser.add_argument("-a", "--all")

@@ -6,6 +6,9 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules")
 
 include(UseHaiku)
 
+set(DOCS_DIR "${CMAKE_INSTALL_PREFIX}/documentation/${PROJECT_NAME}" CACHE FILEPATH "Location of documentation" FORCE)
+add_definitions("-DDOCS_DIR=${DOCS_DIR}")
+
 option(BUILD_USERGUIDE "Use sphinx to generate the user guide" ON)
 if(BUILD_USERGUIDE)
 	find_package(Sphinx)
