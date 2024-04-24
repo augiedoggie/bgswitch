@@ -10,6 +10,9 @@
 #include <be_apps/Tracker/Background.h>
 #include <iostream>
 
+#define Q(x) #x
+#define QUOTE(x) Q(x)
+
 
 void
 _print_subhelp(argparse::ArgumentParser& parser)
@@ -42,8 +45,12 @@ int
 main(int argc, char** argv)
 {
 	argparse::ArgumentParser programParser(argv[0], "1.0", argparse::default_arguments::help);
-	programParser.add_description("Get/Set workspace backgrounds");
-	programParser.add_epilog("Project page with examples: https://github.com/augiedoggie/bgswitch");
+	programParser.add_description("Adjust workspace background settings");
+	std::string epilog = "Project page: https://github.com/augiedoggie/bgswitch";
+#ifdef DOCS_DIR
+	epilog += "\nDocumentation & examples: " QUOTE(DOCS_DIR) "/ReadMe.html";
+#endif
+	programParser.add_epilog(epilog);
 	programParser.add_argument("-a", "--all")
 		.help("Modify all workspaces at once")
 		.default_value(false)
