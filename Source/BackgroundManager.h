@@ -14,7 +14,7 @@ struct rgb_color;
 
 class BackgroundManager {
 public:
-	BackgroundManager(const char* path);
+	BackgroundManager(const char* path = nullptr);
 	virtual ~BackgroundManager();
 
 	status_t InitCheck();
