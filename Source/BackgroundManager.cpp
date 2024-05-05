@@ -141,6 +141,7 @@ BackgroundManager::_FindWorkspaceIndex(int32 workspace, bool create)
 			return B_ERROR;
 		}
 
+		// check if our workspace bit is set in this index
 		if ((1 << (workspace - 1)) & workspaces)
 			return x;
 	}
@@ -150,20 +151,7 @@ BackgroundManager::_FindWorkspaceIndex(int32 workspace, bool create)
 		return B_ERROR;
 
 	// we're switching from global to a locally set background, find the next free index
-	int32 newIndex = _CreateWorkspaceIndex(workspace);
-
-	if (newIndex < B_OK)
-		return newIndex;
-
-	//  get our default values from index 0
-	fBackgroundMessage->AddInt32(B_BACKGROUND_WORKSPACES, (1 << (workspace - 1)));
-	fBackgroundMessage->AddString(B_BACKGROUND_IMAGE, fBackgroundMessage->GetString(B_BACKGROUND_IMAGE, 0, ""));
-	fBackgroundMessage->AddInt32(B_BACKGROUND_MODE, fBackgroundMessage->GetInt32(B_BACKGROUND_MODE, 0, B_BACKGROUND_MODE_SCALED));
-	fBackgroundMessage->AddPoint(B_BACKGROUND_ORIGIN, fBackgroundMessage->GetPoint(B_BACKGROUND_ORIGIN, 0, BPoint(0, 0)));
-	fBackgroundMessage->AddBool(B_BACKGROUND_ERASE_TEXT, fBackgroundMessage->GetBool(B_BACKGROUND_ERASE_TEXT, 0, true));
-	fBackgroundMessage->AddInt32(BACKGROUND_SET, 0);
-
-	return newIndex;
+	return _CreateWorkspaceIndex(workspace);
 }
 
 
@@ -176,14 +164,13 @@ BackgroundManager::_CreateWorkspaceIndex(int32 workspace)
 		return B_BAD_VALUE;
 	}
 
-	int32 countFound = 0;
-	fBackgroundMessage->GetInfo(B_BACKGROUND_WORKSPACES, nullptr, &countFound);
-
 	int32 setWorkspaces = 0;
 	if (fBackgroundMessage->FindInt32(B_BACKGROUND_WORKSPACES, 0, &setWorkspaces) != B_OK) {
 		std::cerr << "Error: Unable to find B_BACKGROUND_WORKSPACES BMessage" << std::endl;
 		return B_ERROR;
 	}
+
+	// TODO verify the new workspace is in setWorkspaces before trying to clear the bit
 
 	// tell Tracker that this workspace has a custom background
 	setWorkspaces &= ~(1 << (workspace - 1));
@@ -191,6 +178,22 @@ BackgroundManager::_CreateWorkspaceIndex(int32 workspace)
 		std::cerr << "Error: Unable to replace B_BACKGROUND_WORKSPACES BMessage" << std::endl;
 		return B_ERROR;
 	}
+
+	int32 countFound = B_ERROR;
+	fBackgroundMessage->GetInfo(B_BACKGROUND_WORKSPACES, nullptr, &countFound);
+	// start at 2 because there should already be at least one index for workspace 0
+	if (countFound < 2)
+		return B_ERROR;
+
+	// get our default values from index 0
+	fBackgroundMessage->AddInt32(B_BACKGROUND_WORKSPACES, (1 << (workspace - 1)));
+	fBackgroundMessage->AddString(B_BACKGROUND_IMAGE, fBackgroundMessage->GetString(B_BACKGROUND_IMAGE, 0, ""));
+	fBackgroundMessage->AddInt32(B_BACKGROUND_MODE, fBackgroundMessage->GetInt32(B_BACKGROUND_MODE, 0, B_BACKGROUND_MODE_SCALED));
+	fBackgroundMessage->AddPoint(B_BACKGROUND_ORIGIN, fBackgroundMessage->GetPoint(B_BACKGROUND_ORIGIN, 0, BPoint(0, 0)));
+	fBackgroundMessage->AddBool(B_BACKGROUND_ERASE_TEXT, fBackgroundMessage->GetBool(B_BACKGROUND_ERASE_TEXT, 0, true));
+	fBackgroundMessage->AddInt32(BACKGROUND_SET, 0);
+
+	// countFound will be our new message index
 	return countFound;
 }
 
