@@ -1,0 +1,8 @@
+
+
+service x-vnd.cpr.wallrus {
+	launch @WALLRUS_BIN@
+	require x-vnd.be-trak
+	on initial_volumes_mounted
+	no_safemode
+}

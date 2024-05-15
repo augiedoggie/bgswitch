@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.19)
 
-project(bgswitch)
+project(bgswitch CXX)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules")
 
@@ -20,6 +20,8 @@ if(BUILD_USERGUIDE)
 else()
 	message("Generating user guide is disabled.")
 endif()
+
+set(CMAKE_CXX_STANDARD 20 CACHE STRING "C++ version")
 
 option(USE_CLANG "Enable building with clang instead of gcc" OFF)
 if(USE_CLANG)

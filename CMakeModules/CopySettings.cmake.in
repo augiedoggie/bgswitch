@@ -1,0 +1,11 @@
+# quick script to copy our settings into place only if the file doesn't already exist
+
+execute_process(
+	COMMAND finddir B_USER_SETTINGS_DIRECTORY
+	OUTPUT_VARIABLE B_USER_SETTINGS_DIRECTORY
+	OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+
+if(NOT EXISTS ${B_USER_SETTINGS_DIRECTORY}/wallrus.toml)
+	file(INSTALL @CMAKE_CURRENT_SOURCE_DIR@/wallrus.toml DESTINATION ${B_USER_SETTINGS_DIRECTORY})
+endif()

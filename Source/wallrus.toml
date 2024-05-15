@@ -1,0 +1,31 @@
+#
+# This file should be at /boot/home/config/settings/wallrus.toml
+#
+
+
+# how many seconds between rotation
+# probably not a good idea to set this too low or Tracker will get unhappy
+rotate_time = 3600
+
+
+# log level can be "error", "info", "debug", or "trace"
+# log file will be located at /var/log/wallrus.log
+log_level = "error"
+
+
+# which workspaces should the app manage
+# the list does not have to be sequential, i.e. you can skip workspaces if you don't want them to be changed
+# entries can be a single path or an array of paths
+# NOTE: The files are not yet filtered by type so the paths must contain only images
+[workspaces]
+1 = "/storage/owncloud/Images/astronomy"
+2 = [
+      "/storage/owncloud/Images/wallpapers",
+      "/storage/owncloud/Images/a_vintage_journey",
+      "/storage/owncloud/Images/ben-regimbal",
+      "/storage/owncloud/Images/chahin-lowpoly",
+      "/storage/owncloud/Images/mc_escher",
+      "/storage/owncloud/Images/jia-yonghui",
+      "/storage/owncloud/Images/townscaper"
+    ]
+3 = "/storage/owncloud/Images/Futurama/wallpapers"
