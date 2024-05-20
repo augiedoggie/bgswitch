@@ -39,6 +39,7 @@ if(BUILD_WALLRUS)
 
 	set(Wallrus_SRCS
 		WallrusApp.cpp
+		WallrusAppScripting.cpp
 		BackgroundManager.cpp
 		Wallrus.rdef)
 

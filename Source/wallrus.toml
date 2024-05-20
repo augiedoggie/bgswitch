@@ -8,7 +8,7 @@
 rotate_time = 3600
 
 
-# log level can be "error", "info", "debug", or "trace"
+# log level can be "none", "error", "info", "debug", or "trace"
 # log file will be located at /var/log/wallrus.log
 log_level = "error"
 

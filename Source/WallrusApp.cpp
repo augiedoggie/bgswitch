@@ -10,7 +10,6 @@
 #include <MessageRunner.h>
 #include <NodeMonitor.h>
 #include <Path.h>
-#include <chrono>
 #include <experimental/random>
 #include <iomanip>
 #include <iostream>
@@ -22,34 +21,21 @@ enum {
 	kRunnerWhat = 'MRT8'
 };
 
-const bigtime_t kDefaultRotateTime = 3600 * 24; // one day
-
-#define TRACE _Log(kLogTrace, "%s()", __FUNCTION__);
-
 
 WallrusApp::WallrusApp()
 	:
-	BServer("application/x-vnd.cpr.wallrus", false, nullptr),
-	fRotateTime(kDefaultRotateTime),
+	BServer("application/x-vnd.cpr.wallrus", true, nullptr),
+	fRotateTime(-1),
 	fRotateRunner(nullptr),
 	fLogLevel(kLogError)
 {
-	BPath logPath;
-	find_directory(B_SYSTEM_LOG_DIRECTORY, &logPath);
-	logPath.Append("wallrus.log");
-	fLogFile.SetTo(logPath.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_OPEN_AT_END);
+	if (_LoadSettings() != B_OK)
+		_Log(kLogError, "Error loading settings!");
 
 	if (fBackgroundManager.InitCheck() != B_OK) {
 		_Log(kLogError, "Error intializing background manager!");
 		return;
 	}
-
-	if (_LoadSettings() != B_OK)
-		_Log(kLogError, "Error loading settings!");
-
-	// ensure our runner is started if the settings file had no rotate_time or it is the default
-	if (fRotateRunner == nullptr)
-		_ResetMessageRunner();
 
 	_Log(kLogTrace, "%s() finished", __FUNCTION__);
 }
@@ -77,6 +63,14 @@ WallrusApp::MessageReceived(BMessage* message)
 			[[fallthrough]];
 		case kRunnerWhat:
 			_RotateBackgrounds();
+			break;
+		case B_COUNT_PROPERTIES:
+		case B_EXECUTE_PROPERTY:
+		case B_GET_PROPERTY:
+		case B_SET_PROPERTY:
+		case B_GET_SUPPORTED_SUITES:
+			if (message->what == B_GET_SUPPORTED_SUITES || message->HasSpecifiers())
+				_ScriptReceived(message);
 			break;
 		default:
 			BServer::MessageReceived(message);
@@ -126,11 +120,12 @@ WallrusApp::_ResetMessageRunner()
 {
 	TRACE
 
-	if (fRotateRunner != nullptr)
-		delete fRotateRunner;
+	delete fRotateRunner;
 
-	BMessage rotateMessage(kRunnerWhat);
-	fRotateRunner = new BMessageRunner(this, &rotateMessage, fRotateTime * 1000 * 1000);
+	if (fRotateTime > 0) {
+		BMessage rotateMessage(kRunnerWhat);
+		fRotateRunner = new BMessageRunner(this, &rotateMessage, fRotateTime * 1000 * 1000);
+	}
 
 	return B_OK;
 }
@@ -171,7 +166,7 @@ WallrusApp::_RotateBackgrounds()
 status_t
 WallrusApp::_RescanDirectories(int32 workspace)
 {
-	_Log(kLogTrace, "%s(%" B_PRIi32 ")", __FUNCTION__, workspace);
+	TRACEF("%" B_PRIi32, workspace);
 
 	if (!fSettingsFolderMap.ContainsKey(HashKey32<int32>(workspace)))
 		return B_ERROR;
@@ -195,7 +190,7 @@ WallrusApp::_RescanDirectories(int32 workspace)
 status_t
 WallrusApp::_ScanDirectory(int32 workspace, const char* path, bool cachePath)
 {
-	_Log(kLogTrace, "%s(%" B_PRIi32 ", %s, %d)", __FUNCTION__, workspace, path, cachePath);
+	TRACEF("%" B_PRIi32 ", \"%s\", %d", workspace, path, cachePath)
 
 	// TODO better sanity check on path
 	if (workspace < 1 || workspace > 32 || path == nullptr)
@@ -278,17 +273,41 @@ WallrusApp::_LoadSettings()
 				fLogLevel = kLogError | kLogInfo | kLogDebug;
 			else if (logVal.value() == "info")
 				fLogLevel = kLogError | kLogInfo;
+			else if (logVal.value() == "none")
+				fLogLevel = kLogNone;
 			else
 				fLogLevel = kLogError;
 		}
 
+		// open our log file if needed
+		if (fLogLevel != kLogNone && fLogFile.InitCheck() == B_NO_INIT) {
+			BPath logPath;
+			find_directory(B_SYSTEM_LOG_DIRECTORY, &logPath);
+			logPath.Append("wallrus.log");
+			if (fLogFile.SetTo(logPath.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_OPEN_AT_END) == B_OK) {
+				_Log(kLogInfo, "Wallrus starting up...");
+				TRACE
+			} else
+				std::cerr << "Error opening log file!" << std::endl;
+		} else if (fLogLevel == kLogNone)
+			// close log file if needed
+			fLogFile.Unset();
+
 		std::optional<int64_t> rtVal = tbl["rotate_time"].value<int64_t>();
-		if (rtVal.has_value()) {
-			// only reset the message runner if the time has actually changed
-			if (rtVal.value() != fRotateTime) {
-				fRotateTime = rtVal.value();
+		// only reset the message runner if the time has actually changed
+		if (rtVal.has_value() && rtVal.value() != fRotateTime) {
+			fRotateTime = rtVal.value();
+			if (fRotateTime > 0)
 				_ResetMessageRunner();
+			else {
+				// no auto rotate with negative or zero time, disable the runner
+				delete fRotateRunner;
+				fRotateRunner = nullptr;
 			}
+		} else if (!rtVal.has_value()) {
+			// no auto rotate if there is no time setting, disable the runner
+			delete fRotateRunner;
+			fRotateRunner = nullptr;
 		}
 
 		// clear fWorkspaceFileMap and fSettingsFolderMap
@@ -315,70 +334,6 @@ WallrusApp::_LoadSettings()
 		std::cerr << err << std::endl;
 		return B_ERROR;
 	}
-
-	return B_OK;
-}
-
-
-template<typename... Args>
-status_t
-WallrusApp::_Log(LogLevel level, const char* message, Args... args)
-{
-	if (fLogFile.InitCheck() != B_OK)
-		return B_ERROR;
-
-	if ((fLogLevel & level) == 0)
-		return B_OK;
-
-	off_t size = 0;
-	if (fLogFile.GetSize(&size) != B_OK)
-		return B_ERROR;
-
-	// check log file size and rotate if needed
-	if (size > 1024000) {
-		BPath logPath;
-		find_directory(B_SYSTEM_LOG_DIRECTORY, &logPath);
-		logPath.Append("wallrus.log");
-		BEntry entry(logPath.Path());
-		entry.Rename("wallrus.log.1", true);
-		if (fLogFile.SetTo(logPath.Path(), B_WRITE_ONLY | B_CREATE_FILE | B_OPEN_AT_END) != B_OK)
-			return B_ERROR; // TODO pass on actual error?
-	}
-
-	std::time_t now_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	std::stringstream logStream;
-	logStream << std::put_time(std::localtime(&now_t), "%Y/%m/%d %T");
-	switch (level) {
-		case kLogInfo:
-			logStream << " [info] ";
-			break;
-		case kLogError:
-			logStream << " [error] ";
-			break;
-		case kLogDebug:
-			logStream << " [debug] ";
-			break;
-		case kLogTrace:
-			logStream << " [trace] ";
-			break;
-		default:
-			logStream << " [unknown] ";
-			break;
-	}
-
-	BString msgString;
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-security"
-	msgString.SetToFormat(message, args...);
-#pragma GCC diagnostic pop
-
-	logStream << msgString << "\n";
-
-	std::string logString = logStream.str();
-	ssize_t bytesWritten = fLogFile.Write(logString.c_str(), logString.length());
-	if (bytesWritten < B_OK || (unsigned)bytesWritten != logString.length())
-		return B_ERROR;
 
 	return B_OK;
 }
