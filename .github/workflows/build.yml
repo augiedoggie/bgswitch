@@ -1,5 +1,11 @@
 name: "Haiku-CI"
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build-haiku:
@@ -17,9 +23,11 @@ jobs:
           - { os: haiku, version: 'r1beta4',  runner: 'ubuntu-latest', architecture: 'x86' }
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout source code
+        uses: actions/checkout@v4
 
-      - uses: korli/action@v0.23.0-haiku
+      - name: Build bgswitch and wallrus
+        uses: korli/action@v0.23.0-haiku
         with:
           operating_system: ${{ matrix.config.os }}
           version: ${{ matrix.config.version }}
@@ -27,10 +35,10 @@ jobs:
           run: |
             if [[ `uname -m` == BePC ]]; then
               ssh user@localhost "pkgman update -y haiku_x86_devel cmd:cmake cmd:gcc_x86 cmd:as_x86 cmd:make" &&
-              setarch x86 cmake -B build -S . &&
+              setarch x86 cmake -B build -S . -DBUILD_WALLRUS=ON &&
               setarch x86 make -C build
             else
               ssh user@localhost "pkgman update -y haiku_devel cmd:cmake cmd:gcc cmd:as cmd:make" &&
-              cmake -B build -S . &&
+              cmake -B build -S . -DBUILD_WALLRUS=ON &&
               make -C build
             fi
