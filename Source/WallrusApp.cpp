@@ -146,7 +146,7 @@ WallrusApp::_RotateBackgrounds()
 			if (_RescanDirectories(entry.key.value) != B_OK)
 				continue;
 
-		int32 rand = std::experimental::randint(0, list->CountItems() - 1);
+		int32 rand = std::experimental::randint(0, static_cast<int>(list->CountItems() - 1));
 		BString* bgString = list->ItemAt(rand);
 		// verify file exists
 		if (BEntry(bgString->String()).IsFile()) {
