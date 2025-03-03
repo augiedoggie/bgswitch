@@ -203,14 +203,24 @@ WallrusApp::_ScanDirectory(int32 workspace, const char* path, bool cachePath)
 	if (cachePath) {
 		// store configured paths in fSettingsFolderMap so we can rescan
 		if (!fSettingsFolderMap.ContainsKey(workspace))
-			fSettingsFolderMap.Put(workspace, new BObjectList<BString>(20, true));
+			fSettingsFolderMap.Put(workspace,
+#if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
+			new BObjectList<BString>(20));
+#else
+			new BObjectList<BString>(20, true));
+#endif
 
 		BObjectList<BString>* folderList = fSettingsFolderMap.Get(workspace);
 		folderList->AddItem(new BString(path));
 	}
 
 	if (!fWorkspaceFileMap.ContainsKey(workspace))
-		fWorkspaceFileMap.Put(workspace, new BObjectList<BString>(20, true));
+		fWorkspaceFileMap.Put(workspace,
+#if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
+			new BObjectList<BString>(20));
+#else
+			new BObjectList<BString>(20, true));
+#endif
 
 	BEntry entry;
 	while (dir.GetNextEntry(&entry, true) != B_ENTRY_NOT_FOUND) {
