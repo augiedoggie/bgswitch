@@ -340,18 +340,25 @@ BackgroundManager::SetBackground(const char* imagePath, int32 workspace)
 	if (messageIndex < B_OK)
 		return messageIndex;
 
-	// TODO ensure imagePath is an absolute path
+	BString pathString(imagePath);
 
 	// verify the file exists if we were given a non-empty path
-	if (imagePath != nullptr && strcmp(imagePath, "") != 0) {
+	if (!pathString.IsEmpty()) {
 		BEntry newWallEntry(imagePath);
 		if (newWallEntry.InitCheck() != B_OK || !newWallEntry.Exists() || !newWallEntry.IsFile()) {
 			std::cerr << "Error: invalid file path" << std::endl;
 			return B_ERROR;
 		}
+
+		BPath absolutePath(&newWallEntry);
+		if (absolutePath.InitCheck() != B_OK) {
+			std::cerr << "Error: unable to get full path to file" << std::endl;
+			return B_ERROR;
+		}
+		pathString = absolutePath.Path();
 	}
 
-	if (fBackgroundMessage->ReplaceString(B_BACKGROUND_IMAGE, messageIndex, imagePath == nullptr ? "" : imagePath) != B_OK) {
+	if (fBackgroundMessage->ReplaceString(B_BACKGROUND_IMAGE, messageIndex, pathString.String()) != B_OK) {
 		std::cerr << "Error: unable to replace background image path in BMessage" << std::endl;
 		return B_ERROR;
 	}
