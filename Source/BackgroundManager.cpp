@@ -18,8 +18,7 @@
 #define BACKGROUND_SET "be:bgndimginfoset"
 
 
-BackgroundManager::BackgroundManager(const char* path)
-	:
+BackgroundManager::BackgroundManager(const char* path) :
 	fBackgroundMessage(nullptr),
 	fFolderNode(nullptr),
 	fInitStatus(B_NO_INIT),
@@ -45,17 +44,17 @@ BackgroundManager::BackgroundManager(const char* path)
 	if (fFolderNode->GetAttrInfo(B_BACKGROUND_INFO, &info) != B_OK)
 		return;
 
-	char* buffer = new char[info.size];
-	ArrayDeleter<char> _(buffer);
-	ssize_t bytesRead = fFolderNode->ReadAttr(B_BACKGROUND_INFO, B_MESSAGE_TYPE, 0, buffer, info.size);
+	char* flatBuffer = new char[info.size];
+	ArrayDeleter<char> _(flatBuffer);
+	ssize_t bytesRead = fFolderNode->ReadAttr(B_BACKGROUND_INFO, B_MESSAGE_TYPE, 0, flatBuffer, info.size);
 
 	if (bytesRead != info.size) {
-		std::cerr << "Error: unable to read be:bgndimginfo from node" << std::endl;
+		std::cerr << "Error: unable to read B_BACKGROUND_INFO from node" << std::endl;
 		return;
 	}
 
 	fBackgroundMessage = new BMessage();
-	if (fBackgroundMessage->Unflatten(buffer) != B_OK) {
+	if (fBackgroundMessage->Unflatten(flatBuffer) != B_OK) {
 		std::cerr << "Error: unable to unflatten message" << std::endl;
 		return;
 	}
@@ -105,14 +104,14 @@ BackgroundManager::_RemoveWorkspaceIndex(int32 workspace)
 	}
 
 	if (fBackgroundMessage->FindInt32(B_BACKGROUND_WORKSPACES, 0, &setWorkspaces) != B_OK) {
-		std::cerr << "Error: Unable to find B_BACKGROUND_WORKSPACES BMessage" << std::endl;
+		std::cerr << "Error: Unable to find B_BACKGROUND_WORKSPACES for index 0" << std::endl;
 		return B_ERROR;
 	}
 
 	// tell Tracker that this workspace uses the global background
 	setWorkspaces |= (1 << (workspace - 1));
 	if (fBackgroundMessage->ReplaceInt32(B_BACKGROUND_WORKSPACES, 0, setWorkspaces) != B_OK) {
-		std::cerr << "Error: Unable to replace B_BACKGROUND_WORKSPACES BMessage" << std::endl;
+		std::cerr << "Error: Unable to replace B_BACKGROUND_WORKSPACES for index 0" << std::endl;
 		return B_ERROR;
 	}
 
@@ -137,7 +136,7 @@ BackgroundManager::_FindWorkspaceIndex(int32 workspace, bool create)
 	for (int32 x = 1; x < countFound; x++) {
 		int32 workspaces = 0;
 		if (fBackgroundMessage->FindInt32(B_BACKGROUND_WORKSPACES, x, &workspaces) != B_OK) {
-			std::cerr << "Error: Unable to find B_BACKGROUND_WORKSPACES BMessage" << std::endl;
+			std::cerr << "Error: Unable to find B_BACKGROUND_WORKSPACES for index " << x << std::endl;
 			return B_ERROR;
 		}
 
@@ -166,7 +165,7 @@ BackgroundManager::_CreateWorkspaceIndex(int32 workspace)
 
 	int32 setWorkspaces = 0;
 	if (fBackgroundMessage->FindInt32(B_BACKGROUND_WORKSPACES, 0, &setWorkspaces) != B_OK) {
-		std::cerr << "Error: Unable to find B_BACKGROUND_WORKSPACES BMessage" << std::endl;
+		std::cerr << "Error: Unable to find B_BACKGROUND_WORKSPACES for index 0" << std::endl;
 		return B_ERROR;
 	}
 
@@ -175,7 +174,7 @@ BackgroundManager::_CreateWorkspaceIndex(int32 workspace)
 	// tell Tracker that this workspace has a custom background
 	setWorkspaces &= ~(1 << (workspace - 1));
 	if (fBackgroundMessage->ReplaceInt32(B_BACKGROUND_WORKSPACES, 0, setWorkspaces) != B_OK) {
-		std::cerr << "Error: Unable to replace B_BACKGROUND_WORKSPACES BMessage" << std::endl;
+		std::cerr << "Error: Unable to replace B_BACKGROUND_WORKSPACES for index 0" << std::endl;
 		return B_ERROR;
 	}
 
@@ -201,15 +200,15 @@ BackgroundManager::_CreateWorkspaceIndex(int32 workspace)
 status_t
 BackgroundManager::_WriteMessage()
 {
-	char* flat = new char[fBackgroundMessage->FlattenedSize()];
-	ArrayDeleter<char> _(flat);
+	char* flatBuffer = new char[fBackgroundMessage->FlattenedSize()];
+	ArrayDeleter<char> _(flatBuffer);
 
-	if (fBackgroundMessage->Flatten(flat, fBackgroundMessage->FlattenedSize()) != B_OK) {
+	if (fBackgroundMessage->Flatten(flatBuffer, fBackgroundMessage->FlattenedSize()) != B_OK) {
 		std::cerr << "Error: unable to flatten new background message" << std::endl;
 		return B_ERROR;
 	}
 
-	if (fFolderNode->WriteAttr(B_BACKGROUND_INFO, B_MESSAGE_TYPE, 0, flat, fBackgroundMessage->FlattenedSize()) < B_OK) {
+	if (fFolderNode->WriteAttr(B_BACKGROUND_INFO, B_MESSAGE_TYPE, 0, flatBuffer, fBackgroundMessage->FlattenedSize()) < B_OK) {
 		std::cerr << "Error: unable to write message to node" << std::endl;
 		return B_ERROR;
 	}

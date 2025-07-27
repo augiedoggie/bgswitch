@@ -22,8 +22,7 @@ enum {
 };
 
 
-WallrusApp::WallrusApp()
-	:
+WallrusApp::WallrusApp() :
 	BServer("application/x-vnd.cpr.wallrus", true, nullptr),
 	fRotateTime(-1),
 	fRotateRunner(nullptr),
@@ -205,9 +204,9 @@ WallrusApp::_ScanDirectory(int32 workspace, const char* path, bool cachePath)
 		if (!fSettingsFolderMap.ContainsKey(workspace))
 			fSettingsFolderMap.Put(workspace,
 #if B_HAIKU_VERSION > B_HAIKU_VERSION_1_BETA_5
-			new BObjectList<BString>(20));
+				new BObjectList<BString>(20));
 #else
-			new BObjectList<BString>(20, true));
+				new BObjectList<BString>(20, true));
 #endif
 
 		BObjectList<BString>* folderList = fSettingsFolderMap.Get(workspace);
@@ -330,7 +329,7 @@ WallrusApp::_LoadSettings()
 					_ScanDirectory(atol(workspace.data()), paths.as_string()->get().c_str(), true);
 				else if (paths.is_array()) {
 					toml::array* pathArray = paths.as_array();
-					for (auto&& pathElement : *pathArray) {
+					for (auto&& pathElement: *pathArray) {
 						if (pathElement.is_string())
 							_ScanDirectory(atol(workspace.data()), pathElement.value<std::string>().value().c_str(), true);
 					}
