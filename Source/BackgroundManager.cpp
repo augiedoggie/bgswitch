@@ -181,8 +181,8 @@ BackgroundManager::_CreateWorkspaceIndex(int32 workspace)
 
 	int32 countFound = B_ERROR;
 	fBackgroundMessage->GetInfo(B_BACKGROUND_WORKSPACES, nullptr, &countFound);
-	// start at 2 because there should already be at least one index for workspace 0
-	if (countFound < 2)
+	// start at 1 because there should already be at least one index for workspace 0
+	if (countFound < 1)
 		return B_ERROR;
 
 	// get our default values from index 0
@@ -340,6 +340,8 @@ BackgroundManager::SetBackground(const char* imagePath, int32 workspace)
 	int32 messageIndex = _FindWorkspaceIndex(workspace, true);
 	if (messageIndex < B_OK)
 		return messageIndex;
+
+	// TODO ensure imagePath is an absolute path
 
 	// verify the file exists if we were given a non-empty path
 	if (imagePath != nullptr && strcmp(imagePath, "") != 0) {
