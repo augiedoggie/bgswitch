@@ -200,15 +200,16 @@ BackgroundManager::_CreateWorkspaceIndex(int32 workspace)
 status_t
 BackgroundManager::_WriteMessage()
 {
-	char* flatBuffer = new char[fBackgroundMessage->FlattenedSize()];
+	ssize_t flatSize = fBackgroundMessage->FlattenedSize();
+	char* flatBuffer = new char[flatSize];
 	ArrayDeleter<char> _(flatBuffer);
 
-	if (fBackgroundMessage->Flatten(flatBuffer, fBackgroundMessage->FlattenedSize()) != B_OK) {
+	if (fBackgroundMessage->Flatten(flatBuffer, flatSize) != B_OK) {
 		std::cerr << "Error: unable to flatten new background message" << std::endl;
 		return B_ERROR;
 	}
 
-	if (fFolderNode->WriteAttr(B_BACKGROUND_INFO, B_MESSAGE_TYPE, 0, flatBuffer, fBackgroundMessage->FlattenedSize()) < B_OK) {
+	if (fFolderNode->WriteAttr(B_BACKGROUND_INFO, B_MESSAGE_TYPE, 0, flatBuffer, flatSize) < B_OK) {
 		std::cerr << "Error: unable to write message to node" << std::endl;
 		return B_ERROR;
 	}
