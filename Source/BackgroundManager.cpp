@@ -322,10 +322,6 @@ BackgroundManager::PrintBackgroundToStream(int32 workspace, bool verbose)
 status_t
 BackgroundManager::ResetWorkspace(int32 workspace)
 {
-	int32 messageIndex = _FindWorkspaceIndex(workspace);
-	if (messageIndex < B_OK)
-		return messageIndex;
-
 	if (status_t status = _RemoveWorkspaceIndex(workspace) != B_OK)
 		return status;
 
@@ -362,7 +358,7 @@ BackgroundManager::SetBackground(const char* imagePath, int32 workspace)
 		}
 	}
 
-	if (fBackgroundMessage->ReplaceString(B_BACKGROUND_IMAGE, messageIndex, pathString.String()) != B_OK) {
+	if (fBackgroundMessage->ReplaceString(B_BACKGROUND_IMAGE, messageIndex, pathString) != B_OK) {
 		std::cerr << "Error: unable to replace background image path in BMessage" << std::endl;
 		return B_ERROR;
 	}
